@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f9fc">
+    <title>Diagnóstico de necessidades | ORVYN</title>
+    <link rel="stylesheet" href="/css/chat.css">
+    <script src="/js/chat.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-main">
+        <a class="brand" href="/" aria-label="ORVYN - início">
+          <span class="brand-mark" aria-hidden="true">O</span>
+          <span>ORVYN</span>
+        </a>
+
+        <button class="new-demand-button" id="new-demand" type="button">
+          <span aria-hidden="true">＋</span>
+          Nova necessidade
+        </button>
+
+        <p class="nav-caption">Workspace</p>
+        <nav class="side-nav" aria-label="Workspace">
+          <a href="/" class="nav-link">
+            <span class="nav-icon" aria-hidden="true">⌂</span>
+            Visão geral
+          </a>
+          <a href="/chat.html" class="nav-link active" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">⌕</span>
+            Encontrar soluções
+          </a>
+          <a href="/" class="nav-link">
+            <span class="nav-icon" aria-hidden="true">⚙</span>
+            Configurações
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-profile">
+        <span class="avatar" id="profile-initials">--</span>
+        <span class="profile-copy">
+          <strong id="profile-name">Carregando perfil...</strong>
+          <small id="profile-role">Lojista</small>
+        </span>
+      </div>
+    </aside>
+
+    <div class="app-area">
+      <header class="topbar">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/" aria-label="Início">▦</a>
+          <span aria-hidden="true">›</span>
+          <span>Encontrar soluções</span>
+          <span aria-hidden="true">›</span>
+          <strong>Diagnóstico de necessidades</strong>
+        </nav>
+        <span class="connection-indicator">
+          <span class="connection-dot" aria-hidden="true"></span>
+          Conectado
+        </span>
+      </header>
+
+      <main class="page-content">
+        <div class="page-heading">
+          <h1>Vamos entender seu negócio</h1>
+          <p>Responda algumas perguntas para encontrar soluções compatíveis</p>
+        </div>
+
+        <section class="chat-card" aria-label="Diagnóstico guiado">
+          <header class="chat-header">
+            <div class="chat-title">
+              <span class="chat-status-dot" aria-hidden="true"></span>
+              <strong>Diagnóstico Guiado de Varejo</strong>
+            </div>
+            <div class="progress-area">
+              <span id="progress-label">Preparando diagnóstico...</span>
+              <span class="progress-track" aria-hidden="true">
+                <span class="progress-value" id="progress-value"></span>
+              </span>
+              <span class="progress-badge" id="progress-badge">Conectando</span>
+            </div>
+          </header>
+
+          <div class="chat-body">
+            <div class="conversation" id="conversation" aria-live="polite"></div>
+            <div class="chat-error" id="chat-error" role="alert" hidden></div>
+            <form class="answer-form" id="answer-form" hidden>
+              <fieldset class="answer-fieldset">
+                <legend id="question-prompt"></legend>
+                <div class="answer-options" id="answer-options"></div>
+              </fieldset>
+              <div class="form-actions">
+                <span class="form-hint" id="form-hint"></span>
+                <button class="primary-button" type="submit">Enviar resposta</button>
+              </div>
+            </form>
+
+            <form class="text-form" id="text-form" hidden>
+              <label class="text-prompt" for="free-text">
+                <span class="prompt-icon" aria-hidden="true">✦</span>
+                Descreva com suas palavras o principal desafio no dia a dia:
+              </label>
+              <textarea id="free-text" name="texto_livre" rows="4" maxlength="500" required
+                placeholder="Descreva detalhadamente..."></textarea>
+              <div class="form-actions text-actions">
+                <span class="form-hint"><span id="character-count">0</span>/500 caracteres</span>
+                <button class="primary-button" id="submit-demand" type="submit">Analisar necessidade</button>
+              </div>
+            </form>
+
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

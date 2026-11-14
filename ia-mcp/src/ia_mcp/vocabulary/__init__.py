@@ -1,0 +1,1 @@
+"""Vocabulário controlado de tags."""

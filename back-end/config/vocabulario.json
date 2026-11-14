@@ -1,0 +1,10 @@
+{
+  "tags": ["atendimento", "whatsapp", "vendas_online", "atracao_clientes", "fidelizacao", "estoque", "caixa", "gestao", "marketing", "logistica", "automacao"],
+  "tags_por_dificuldade": {
+    "atender_whatsapp": ["atendimento", "whatsapp"],
+    "vender_online": ["vendas_online"],
+    "atrair_clientes": ["atracao_clientes", "marketing"],
+    "trazer_cliente_de_volta": ["fidelizacao"],
+    "controle_estoque_caixa": ["estoque", "caixa", "gestao"]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "_comment": "Vocabulário oficial do backend operacional (back-end/config/vocabulario.json). A sincronia é verificada por tests/integration/test_backend_contract.py.",
+  "tags": [
+    "atendimento",
+    "whatsapp",
+    "vendas_online",
+    "atracao_clientes",
+    "fidelizacao",
+    "estoque",
+    "caixa",
+    "gestao",
+    "marketing",
+    "logistica",
+    "automacao"
+  ]
+}
