@@ -108,6 +108,37 @@ no código.
 - `openai_compatible`: exige URL e modelo; ainda usa o heurístico como fallback.
 - `heuristic`: funciona offline, sem rede e sem credenciais.
 
+### Qual provedor gratuito usar
+
+O serviço fala o protocolo **OpenAI-compatible**; qualquer provedor que o
+implemente funciona sem mudar código. Para a demo do hackathon:
+
+| Provedor | Free tier | Quando usar |
+|---|---|---|
+| **Groq** (`https://api.groq.com/openai/v1`) | ~30 req/min e ~1k req/dia, sem cartão | **Recomendado para a demo**: baixa latência e JSON confiável |
+| **Google AI Studio / Gemini Flash** | cota diária gratuita | Alternativa com bom entendimento de português |
+| **Ollama local** (`http://localhost:11434/v1`) | ilimitado no próprio laptop | Demo sem internet ou com dados sensíveis |
+
+Configuração típica com Groq:
+
+```bash
+IA_MCP_AI_PROVIDER=openai_compatible
+IA_MCP_AI_BASE_URL=https://api.groq.com/openai/v1
+IA_MCP_AI_MODEL=openai/gpt-oss-120b
+IA_MCP_AI_API_KEY=<chave>
+```
+
+Por que não alucina:
+
+- `temperature=0` e resposta pedida em JSON (extraída e validada no código);
+- o prompt recebe o **vocabulário fechado** e a instrução de responder somente
+  com tags dele;
+- tags fora do vocabulário são descartadas no código;
+- o modelo **não calcula** nada: quantidades, pontuação e matching são do
+  backend;
+- qualquer falha técnica cai no heurístico determinístico, sem inventar dados.
+
+
 ## 6. Contratos HTTP
 
 ### 6.1 `POST /ia/classificar`
@@ -121,7 +152,7 @@ Request:
 Response `200`:
 
 ```json
-{ "tags": ["atendimento_whatsapp", "conversao_vendas"] }
+{ "tags": ["atendimento", "whatsapp", "vendas_online"] }
 ```
 
 Regras:
@@ -157,10 +188,10 @@ Request:
 {
   "grupos": [
     {
-      "id": "grupo-1",
+      "chave": "atendimento",
       "titulo": "Atendimento fora do horário",
-      "tags": ["atendimento_fora_horario"],
-      "demandas": [{ "id": "d1", "texto": "Não consigo responder à noite." }]
+      "quantidade": 7,
+      "exemplos": ["Não consigo responder à noite."]
     }
   ]
 }
@@ -171,16 +202,17 @@ Response `200`:
 ```json
 {
   "interpretacoes": {
-    "grupo-1": "Interpretação textual do grupo."
+    "atendimento": "Interpretação textual do grupo."
   }
 }
 ```
 
 Regras:
 
-- cada chave de `interpretacoes` é o `id` de um grupo recebido;
+- cada chave de `interpretacoes` é a `chave` de um grupo recebido;
 - os valores são strings;
-- não há contagens, pesos, scores de matching nem status;
+- não há contagens, pesos, scores de matching nem status na resposta
+  (`quantidade` é apenas contexto de entrada, nunca recalculado);
 - `{"grupos": []}` retorna `{"interpretacoes": {}}`;
 - campos extras nos grupos são ignorados, para tolerar evoluções do backend.
 
@@ -188,7 +220,7 @@ Regras:
 
 | Situação | HTTP |
 |---|---|
-| Corpo inválido (texto vazio, campo ausente, `id` vazio) | `422` |
+| Corpo inválido (texto vazio, campo ausente, `chave` vazia) | `422` |
 | Modelo falha e heurístico responde | `200` com o resultado local |
 | Modelo e heurístico falham tecnicamente | `503` |
 | Erro inesperado | `500` |
@@ -205,14 +237,15 @@ backend.
 ## 7. Vocabulário de tags
 
 O contrato HTTP de classificação recebe apenas `texto`, portanto o vocabulário
-é carregado de um **arquivo JSON fornecido pelo backend**. O arquivo incluído em
-`src/ia_mcp/vocabulary/tags.json` é um substituto de desenvolvimento e deve ser
-trocado pelo oficial antes da integração final.
+é carregado de um **arquivo JSON fornecido pelo backend**. O arquivo
+`src/ia_mcp/vocabulary/tags.json` já contém as 11 tags oficiais de
+`back-end/config/vocabulario.json`; a sincronia entre as duas cópias é validada
+por `tests/integration/test_backend_contract.py`.
 
 Formato mínimo:
 
 ```json
-{ "tags": ["atendimento_whatsapp", "conversao_vendas"] }
+{ "tags": ["atendimento", "whatsapp", "vendas_online"] }
 ```
 
 Formato enriquecido (recomendado):
@@ -221,9 +254,9 @@ Formato enriquecido (recomendado):
 {
   "tags": [
     {
-      "tag": "atendimento_whatsapp",
-      "label": "Atendimento via WhatsApp",
-      "keywords": ["whatsapp", "zap", "mensagem"]
+      "tag": "atendimento",
+      "label": "Atendimento",
+      "keywords": ["atendimento", "responder", "demora"]
     }
   ]
 }
@@ -237,9 +270,9 @@ Regras:
   impede a inicialização com erro claro;
 - tags duplicadas são rejeitadas;
 - `keywords.json` é local e contém apenas sinônimos para o fallback heurístico;
-- sinônimos de tags que não existem no vocabulário são ignorados com aviso.
-
-**Artefato pendente:** lista/arquivo JSON oficial do vocabulário do backend.
+- sinônimos de tags que não existem no vocabulário são ignorados com aviso;
+- qualquer alteração no vocabulário oficial deve ser replicada em
+  `src/ia_mcp/vocabulary/tags.json` (o teste de contrato acusa divergência).
 
 ## 8. Ferramentas MCP
 
@@ -253,12 +286,15 @@ Servidor: `http://localhost:8100/mcp/` (Streamable HTTP, mesmo processo da API).
 Ambas são somente leitura (`readOnlyHint: true`), não escrevem dados e não
 aplicam matching.
 
+O backend exige o header `X-Perfil` em todas as rotas `/api/*`. O cliente envia
+`X-Perfil: mcp` por padrão (`IA_MCP_BACKEND_PERFIL`) e, se configurado,
+`X-Ator-Id` (`IA_MCP_BACKEND_ATOR_ID`).
+
 ### Pass-through
 
 O módulo **não presume o schema** das respostas do backend. O JSON recebido é
-devolvido sem remapeamento, tanto para listas quanto para envelopes. Por isso,
-exemplos reais ou o OpenAPI de `/api/mcp/radar` e `/api/mcp/startups` ainda são
-necessários para validar a compatibilidade final.
+devolvido sem remapeamento, tanto para listas quanto para envelopes. Os
+contratos atuais estão em `back-end/app/services/consultas.py`:
 
 Em erro de backend (HTTP ≥ 400, timeout, rede ou JSON inválido), a ferramenta
 retorna erro MCP controlado, sem derrubar o servidor.

@@ -40,7 +40,7 @@ class StubProvider:
 
     async def interpret(self, groups: list[GrupoInsight]) -> InsightsOutcome:
         return InsightsOutcome(
-            interpretacoes={group.id: f"Interpretação de {group.id}." for group in groups},
+            interpretacoes={group.chave: f"Interpretação de {group.chave}." for group in groups},
             provider=self.name,
         )
 
@@ -98,12 +98,12 @@ async def test_insights_contract(client: httpx.AsyncClient) -> None:
     payload = {
         "grupos": [
             {
-                "id": "grupo-1",
+                "chave": "grupo-1",
                 "titulo": "Atendimento",
-                "tags": ["atendimento_whatsapp"],
-                "demandas": [{"id": "d1", "texto": "Não respondo à noite."}],
+                "quantidade": 3,
+                "exemplos": ["Não respondo à noite."],
             },
-            {"id": "grupo-2"},
+            {"chave": "grupo-2"},
         ]
     }
 
@@ -164,7 +164,7 @@ async def test_log_text_is_opt_in(
         ("/ia/resumir", {"texto": ""}),
         ("/ia/resumir", {}),
         ("/ia/insights", {}),
-        ("/ia/insights", {"grupos": [{"id": ""}]}),
+        ("/ia/insights", {"grupos": [{"chave": ""}]}),
     ],
 )
 async def test_invalid_payloads_return_422(
@@ -189,7 +189,7 @@ async def test_total_provider_failure_returns_503(
         for path, payload in [
             ("/ia/classificar", {"texto": "texto"}),
             ("/ia/resumir", {"texto": "texto"}),
-            ("/ia/insights", {"grupos": [{"id": "g1"}]}),
+            ("/ia/insights", {"grupos": [{"chave": "g1"}]}),
         ]:
             response = await http.post(path, json=payload)
             assert response.status_code == 503

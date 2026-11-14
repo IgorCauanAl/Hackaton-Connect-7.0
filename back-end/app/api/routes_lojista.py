@@ -31,7 +31,8 @@ def obter_lojista(lojista_id: int, ator: Ator = Depends(get_ator), s: Servicos =
 @router.post("/demandas", status_code=201)
 def registrar_demanda(corpo: DemandaIn, ator: Ator = Depends(get_ator), s: Servicos = Depends(get_servicos)):
     """Fecha o chat: classifica (IA ou botões), calcula matching e registra a demanda."""
-    return s.demandas.registrar(ator, corpo.lojista_id, corpo.respostas.model_dump(), corpo.texto_livre)
+    return s.demandas.registrar(ator, corpo.lojista_id, corpo.respostas.model_dump(),
+                                corpo.texto_livre, corpo.tags)
 
 
 @router.get("/demandas/{demanda_id}")

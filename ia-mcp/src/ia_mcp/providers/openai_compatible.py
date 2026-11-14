@@ -199,12 +199,12 @@ class OpenAICompatibleProvider:
 
         interpretacoes: dict[str, str] = {}
         for group in groups:
-            value = mapping.get(group.id)
+            value = mapping.get(group.chave)
             if not isinstance(value, str) or not value.strip():
                 raise InvalidProviderResponseError(
-                    f"Interpretação ausente para o grupo '{group.id}'"
+                    f"Interpretação ausente para o grupo '{group.chave}'"
                 )
-            interpretacoes[group.id] = " ".join(value.split())
+            interpretacoes[group.chave] = " ".join(value.split())
 
         return InsightsOutcome(
             interpretacoes=interpretacoes,

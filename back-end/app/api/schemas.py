@@ -20,6 +20,10 @@ class DemandaIn(BaseModel):
     lojista_id: int
     respostas: RespostasChat
     texto_livre: str = Field(min_length=1, max_length=500)
+    # Quando o orquestrador já classificou o texto via IA, envia as tags aqui
+    # para evitar uma segunda chamada ao serviço de IA. O backend continua
+    # validando as tags contra o vocabulário e aplicando o fallback se preciso.
+    tags: list[str] | None = None
 
 
 class TesteIn(BaseModel):

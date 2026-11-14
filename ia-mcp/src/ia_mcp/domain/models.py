@@ -35,25 +35,25 @@ class InsightsOutcome(BaseModel):
     fallback_used: bool = False
 
 
-class DemandaInsight(BaseModel):
-    """Demanda recebida dentro de um grupo para interpretação."""
-
-    id: str = Field(min_length=1)
-    texto: str
-
-
 class GrupoInsight(BaseModel):
-    """Grupo de demandas enviado pelo orquestrador/backend."""
+    """Grupo de demandas no formato real enviado pelo backend operacional.
 
-    id: str = Field(min_length=1)
+    Espelha o payload de ``RadarService.gerar_insights``:
+
+    ``{"chave": str, "titulo": str | None, "quantidade": int, "exemplos": [str]}``
+
+    A IA pode narrar o grupo, mas nunca devolver contagens, pesos, scores ou
+    status: ``quantidade`` é apenas informação de contexto recebida.
+    """
+
+    chave: str = Field(min_length=1)
     titulo: str | None = None
-    tags: list[str] = Field(default_factory=list)
-    demandas: list[DemandaInsight] = Field(default_factory=list)
+    quantidade: int = Field(default=0, ge=0)
+    exemplos: list[str] = Field(default_factory=list)
 
 
 __all__ = [
     "ClassificationOutcome",
-    "DemandaInsight",
     "GrupoInsight",
     "InsightsOutcome",
     "SummaryOutcome",

@@ -27,7 +27,7 @@ class StubProvider:
 
     async def interpret(self, groups: list[GrupoInsight]) -> InsightsOutcome:
         return InsightsOutcome(
-            interpretacoes={group.id: "Interpretação." for group in groups},
+            interpretacoes={group.chave: "Interpretação." for group in groups},
             provider=self.name,
         )
 

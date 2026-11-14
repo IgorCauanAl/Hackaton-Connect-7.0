@@ -33,6 +33,8 @@ async def test_listar_radar_is_pass_through() -> None:
     assert len(seen) == 1
     assert seen[0].method == "GET"
     assert seen[0].url.path == "/api/mcp/radar"
+    assert seen[0].headers["x-perfil"] == "mcp"
+    assert "x-ator-id" not in seen[0].headers
 
 
 async def test_buscar_startups_sends_filters() -> None:
@@ -87,3 +89,23 @@ async def test_invalid_json_becomes_backend_unavailable() -> None:
 def test_requires_base_url() -> None:
     with pytest.raises(ConfigurationError):
         BackendClient(base_url="")
+
+
+async def test_sends_configured_actor_headers() -> None:
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, json=RADAR_PAYLOAD)
+
+    client = BackendClient(
+        base_url="http://backend.local",
+        perfil="mcp",
+        ator_id=42,
+        transport=httpx.MockTransport(handler),
+    )
+
+    await client.listar_radar()
+
+    assert seen[0].headers["x-perfil"] == "mcp"
+    assert seen[0].headers["x-ator-id"] == "42"

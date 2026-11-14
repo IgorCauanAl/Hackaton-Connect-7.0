@@ -126,6 +126,8 @@ def create_app(
     backend_client = backend_client or BackendClient(
         base_url=settings.backend_base_url,
         timeout=settings.backend_timeout_seconds,
+        perfil=settings.backend_perfil,
+        ator_id=settings.backend_ator_id,
     )
     service = build_service(settings, chain, vocabulary)
 

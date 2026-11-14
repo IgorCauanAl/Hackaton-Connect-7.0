@@ -114,7 +114,9 @@ class HeuristicProvider:
     async def interpret(
         self, groups: Sequence[GrupoInsight]
     ) -> InsightsOutcome:
-        interpretacoes = {group.id: self._interpret_group(group) for group in groups}
+        interpretacoes = {
+            group.chave: self._interpret_group(group) for group in groups
+        }
         return InsightsOutcome(
             interpretacoes=interpretacoes,
             provider=self.name,
@@ -124,25 +126,21 @@ class HeuristicProvider:
         subject = (
             f'O grupo "{group.titulo}"'
             if group.titulo
-            else f"O grupo {group.id}"
+            else f"O grupo {group.chave}"
         )
         parts = [subject]
 
-        if group.tags:
-            readable = ", ".join(tag.replace("_", " ") for tag in group.tags)
-            parts.append(f"abrange os temas {readable}")
-        else:
-            parts.append("não possui tags informadas")
-
         excerpts: list[str] = []
-        for demanda in group.demandas[:2]:
-            excerpt = truncate_words(collapse_whitespace(demanda.texto), 160)
+        for example in group.exemplos[:2]:
+            excerpt = truncate_words(collapse_whitespace(example), 160)
             if excerpt:
                 excerpts.append(excerpt)
 
         if excerpts:
             quoted = "; ".join(f'"{excerpt}"' for excerpt in excerpts)
-            parts.append(f"e reúne relatos como {quoted}")
+            parts.append(f"reúne relatos como {quoted}")
+        else:
+            parts.append("não possui relatos de exemplo para contextualizar")
 
         interpretation = collapse_whitespace(" ".join(parts)) + "."
         return truncate_words(interpretation, self._max_insight_chars)

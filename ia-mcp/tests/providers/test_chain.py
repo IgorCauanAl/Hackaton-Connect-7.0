@@ -42,7 +42,7 @@ class WorkingProvider:
 
     async def interpret(self, groups: list[GrupoInsight]) -> InsightsOutcome:
         return InsightsOutcome(
-            interpretacoes={group.id: "Interpretação." for group in groups},
+            interpretacoes={group.chave: "Interpretação." for group in groups},
             provider=self.name,
         )
 
@@ -75,14 +75,14 @@ async def test_raises_service_unavailable_when_all_fail(vocabulary: Vocabulary) 
         await chain.summarize("texto")
 
     with pytest.raises(ServiceUnavailableError):
-        await chain.interpret([GrupoInsight(id="g1")])
+        await chain.interpret([GrupoInsight(chave="g1")])
 
 
 async def test_summarize_and_interpret_fallbacks() -> None:
     chain = ProviderChain([FailingProvider(), WorkingProvider()])
 
     summary = await chain.summarize("texto")
-    insights = await chain.interpret([GrupoInsight(id="g1")])
+    insights = await chain.interpret([GrupoInsight(chave="g1")])
 
     assert summary.resumo == "Resumo."
     assert summary.fallback_used is True

@@ -28,8 +28,8 @@ SUMMARIZATION_SYSTEM = (
 
 INSIGHTS_SYSTEM = (
     "Você interpreta grupos de demandas de varejo. "
-    "Responda SOMENTE com um objeto JSON que mapeia o id de cada grupo para uma "
-    "interpretação textual de uma frase, em português do Brasil. "
+    "Responda SOMENTE com um objeto JSON que mapeia a CHAVE de cada grupo para "
+    "uma interpretação textual de uma frase, em português do Brasil. "
     "Inclua todos os grupos recebidos e não inclua contagens, quantidades, "
     "pesos, scores de matching, prioridades ou status."
 )
@@ -49,10 +49,10 @@ def summarization_user_prompt(text: str) -> str:
 def insights_user_prompt(groups: Sequence[GrupoInsight]) -> str:
     payload = [
         {
-            "id": group.id,
+            "chave": group.chave,
             "titulo": group.titulo,
-            "tags": list(group.tags),
-            "demandas": [demanda.texto for demanda in group.demandas],
+            "quantidade": group.quantidade,
+            "exemplos": list(group.exemplos),
         }
         for group in groups
     ]

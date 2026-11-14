@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------ backend
     backend_base_url: str = "http://localhost:8000"
     backend_timeout_seconds: float = Field(default=10.0, gt=0)
+    backend_perfil: str = "mcp"
+    backend_ator_id: int | None = None
 
     # --------------------------------------------------------------- provedor IA
     ai_provider: Literal["auto", "openai_compatible", "heuristic"] = "auto"

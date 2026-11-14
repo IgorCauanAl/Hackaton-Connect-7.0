@@ -27,6 +27,8 @@ class BackendClient:
         *,
         base_url: str,
         timeout: float = 10.0,
+        perfil: str = "mcp",
+        ator_id: int | None = None,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
         if not base_url or not base_url.strip():
@@ -34,6 +36,13 @@ class BackendClient:
         self._base_url = base_url.strip().rstrip("/") + "/"
         self._timeout = timeout
         self._transport = transport
+
+        perfil = (perfil or "mcp").strip().lower()
+        if not perfil:
+            raise ConfigurationError("IA_MCP_BACKEND_PERFIL não pode ser vazio")
+        self._headers = {"X-Perfil": perfil}
+        if ator_id is not None:
+            self._headers["X-Ator-Id"] = str(ator_id)
 
     async def _get(
         self, path: str, params: dict[str, str] | None = None
@@ -43,6 +52,7 @@ class BackendClient:
                 base_url=self._base_url,
                 timeout=self._timeout,
                 transport=self._transport,
+                headers=self._headers,
             ) as client:
                 response = await client.get(path, params=params)
         except httpx.TimeoutException as exc:

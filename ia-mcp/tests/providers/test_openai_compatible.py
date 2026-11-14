@@ -8,7 +8,7 @@ from typing import Callable
 import httpx
 import pytest
 
-from ia_mcp.domain.models import DemandaInsight, GrupoInsight
+from ia_mcp.domain.models import GrupoInsight
 from ia_mcp.errors import (
     InvalidProviderResponseError,
     ProviderUnavailableError,
@@ -162,11 +162,12 @@ async def test_summarize_rejects_empty_content() -> None:
 async def test_interpret_maps_group_ids() -> None:
     groups = [
         GrupoInsight(
-            id="g1",
+            chave="g1",
             titulo="WhatsApp",
-            demandas=[DemandaInsight(id="d1", texto="Não respondo à noite.")],
+            quantidade=2,
+            exemplos=["Não respondo à noite."],
         ),
-        GrupoInsight(id="g2", tags=["pagamentos"]),
+        GrupoInsight(chave="g2", exemplos=["Pix fora do ar."]),
     ]
     content = json.dumps({"g1": "Dificuldade de atendimento.", "g2": "Tema de pagamentos."})
     provider = make_provider(lambda request: httpx.Response(200, json=chat_body(content)))
@@ -180,7 +181,7 @@ async def test_interpret_maps_group_ids() -> None:
 
 
 async def test_interpret_accepts_wrapped_mapping() -> None:
-    groups = [GrupoInsight(id="g1")]
+    groups = [GrupoInsight(chave="g1")]
     content = json.dumps({"interpretacoes": {"g1": "Interpretação."}})
     provider = make_provider(lambda request: httpx.Response(200, json=chat_body(content)))
 
@@ -190,7 +191,7 @@ async def test_interpret_accepts_wrapped_mapping() -> None:
 
 
 async def test_interpret_rejects_missing_group_key() -> None:
-    groups = [GrupoInsight(id="g1"), GrupoInsight(id="g2")]
+    groups = [GrupoInsight(chave="g1"), GrupoInsight(chave="g2")]
     content = json.dumps({"g1": "Somente um."})
     provider = make_provider(lambda request: httpx.Response(200, json=chat_body(content)))
 

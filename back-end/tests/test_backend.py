@@ -18,6 +18,15 @@ class IAFake:
     def interpretar_grupos(self, grupos): return {g["chave"]: f"IA: {g['titulo']}" for g in grupos}
 
 
+class IAContador(IAFake):
+    def __init__(self):
+        self.chamadas = 0
+
+    def extrair_tags(self, texto):
+        self.chamadas += 1
+        return super().extrair_tags(texto)
+
+
 def novo_ambiente(ia=None):
     conn = database.connect(":memory:")
     seed.carregar(conn, Settings())
@@ -58,6 +67,22 @@ class MatchingTests(unittest.TestCase):
         res = svc.demandas.registrar(MARIA, 1, self.maria, seed.TEXTO_MARIA)
         self.assertEqual(res["tags_origem"], "ia")
         self.assertNotIn("tag_fora_do_vocabulario", res["tags_identificadas"])
+
+    def test_tags_do_orquestrador_evitam_segunda_chamada_de_ia(self):
+        ia = IAContador()
+        _, svc = novo_ambiente(ia)
+        res = svc.demandas.registrar(MARIA, 1, self.maria, seed.TEXTO_MARIA,
+                                     tags=["whatsapp", "estoque", "tag_invalida"])
+        self.assertEqual(res["tags_origem"], "ia")
+        self.assertEqual(res["tags_identificadas"], ["whatsapp", "estoque"])
+        self.assertEqual(ia.chamadas, 0)
+
+    def test_tags_do_orquestrador_invalidas_caem_no_fallback(self):
+        _, svc = novo_ambiente()
+        res = svc.demandas.registrar(MARIA, 1, self.maria, seed.TEXTO_MARIA,
+                                     tags=["tag_invalida"])
+        self.assertEqual(res["tags_origem"], "botoes")
+        self.assertEqual(res["tags_identificadas"], ["atendimento", "whatsapp"])
 
 
 class FluxoTests(unittest.TestCase):

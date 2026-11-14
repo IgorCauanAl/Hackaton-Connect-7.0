@@ -94,5 +94,7 @@ def test_explicit_llm_without_credentials_fails() -> None:
 def test_default_vocabulary_files_load() -> None:
     vocabulary = load_vocabulary(Settings(_env_file=None))
 
-    assert len(vocabulary) > 0
-    assert "atendimento_whatsapp" in vocabulary
+    assert len(vocabulary) == 11
+    assert "atendimento" in vocabulary
+    assert vocabulary.get("whatsapp").keywords  # type: ignore[union-attr]
+    assert "atendimento_whatsapp" not in vocabulary

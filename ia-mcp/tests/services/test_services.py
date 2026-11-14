@@ -6,7 +6,6 @@ import pytest
 
 from ia_mcp.domain.models import (
     ClassificationOutcome,
-    DemandaInsight,
     GrupoInsight,
     InsightsOutcome,
     SummaryOutcome,
@@ -163,7 +162,7 @@ async def test_insights_orders_keys_as_input() -> None:
     provider = FakeProvider(mapping={"g2": "B", "g1": "A"})
     service = InsightsService(ProviderChain([provider]))
 
-    outcome = await service.interpret([GrupoInsight(id="g1"), GrupoInsight(id="g2")])
+    outcome = await service.interpret([GrupoInsight(chave="g1"), GrupoInsight(chave="g2")])
 
     assert list(outcome.interpretacoes) == ["g1", "g2"]
     assert outcome.interpretacoes == {"g1": "A", "g2": "B"}
@@ -174,7 +173,7 @@ async def test_insights_missing_group_raises() -> None:
     service = InsightsService(ProviderChain([provider]))
 
     with pytest.raises(ServiceUnavailableError):
-        await service.interpret([GrupoInsight(id="g1"), GrupoInsight(id="g2")])
+        await service.interpret([GrupoInsight(chave="g1"), GrupoInsight(chave="g2")])
 
 
 async def test_insights_empty_groups_does_not_call_provider() -> None:
@@ -203,5 +202,5 @@ async def test_facade_delegates(vocabulary: Vocabulary) -> None:
     assert await facade.classificar("texto") == ["pagamentos"]
     assert await facade.resumir("texto") == "Resumo curto."
     assert await facade.interpretar(
-        [GrupoInsight(id="g1", demandas=[DemandaInsight(id="d1", texto="x")])]
+        [GrupoInsight(chave="g1", exemplos=["x"])]
     ) == {"g1": "Interpretação."}

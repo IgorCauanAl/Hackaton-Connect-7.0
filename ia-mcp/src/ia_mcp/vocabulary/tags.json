@@ -1,35 +1,16 @@
 {
-  "_comment": "SUBSTITUTO DE DESENVOLVIMENTO. Deve ser trocado pelo vocabulário JSON oficial fornecido pelo backend operacional. Ver docs/ia-mcp.md.",
+  "_comment": "Vocabulário oficial do backend operacional (back-end/config/vocabulario.json). A sincronia é verificada por tests/integration/test_backend_contract.py.",
   "tags": [
-    {
-      "tag": "atendimento_whatsapp",
-      "label": "Atendimento via WhatsApp",
-      "keywords": ["whatsapp", "zap", "mensagem", "chat"]
-    },
-    {
-      "tag": "automacao_atendimento",
-      "label": "Automação de atendimento",
-      "keywords": ["automatizar", "automacao", "bot", "resposta automatica", "chatbot"]
-    },
-    {
-      "tag": "atendimento_fora_horario",
-      "label": "Atendimento fora do horário",
-      "keywords": ["fora do horario", "fora do expediente", "24 horas", "apos o horario"]
-    },
-    {
-      "tag": "conversao_vendas",
-      "label": "Conversão de vendas",
-      "keywords": ["conversao de vendas", "converter", "perco vendas", "fechar venda", "taxa de conversao"]
-    },
-    {
-      "tag": "controle_estoque",
-      "label": "Controle de estoque",
-      "keywords": ["estoque", "inventario", "reposicao", "produto em falta"]
-    },
-    {
-      "tag": "pagamentos",
-      "label": "Pagamentos",
-      "keywords": ["pagamento", "pix", "cartao", "maquininha", "cobranca"]
-    }
+    "atendimento",
+    "whatsapp",
+    "vendas_online",
+    "atracao_clientes",
+    "fidelizacao",
+    "estoque",
+    "caixa",
+    "gestao",
+    "marketing",
+    "logistica",
+    "automacao"
   ]
 }

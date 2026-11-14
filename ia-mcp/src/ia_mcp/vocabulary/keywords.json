@@ -1,9 +1,87 @@
 {
-  "_comment": "Sinônimos usados apenas pelo fallback heurístico local. Não substituem o vocabulário do backend; tags desconhecidas são ignoradas no carregamento.",
-  "atendimento_whatsapp": ["whatsapp", "zap", "mensagem", "chat"],
-  "automacao_atendimento": ["automatizar", "automacao", "bot", "resposta automatica", "chatbot"],
-  "atendimento_fora_horario": ["fora do horario", "fora do expediente", "24 horas", "apos o horario"],
-  "conversao_vendas": ["conversao de vendas", "converter", "perco vendas", "fechar venda", "taxa de conversao"],
-  "controle_estoque": ["estoque", "inventario", "reposicao", "produto em falta"],
-  "pagamentos": ["pagamento", "pix", "cartao", "maquininha", "cobranca"]
+  "_comment": "Sinônimos locais usados apenas pelo provedor heurístico. Não substituem o vocabulário oficial.",
+  "atendimento": [
+    "atendimento",
+    "atender",
+    "responder",
+    "demora no atendimento",
+    "suporte",
+    "cliente esperando"
+  ],
+  "whatsapp": [
+    "whatsapp",
+    "zap",
+    "mensagem",
+    "chat"
+  ],
+  "vendas_online": [
+    "vender online",
+    "venda online",
+    "loja virtual",
+    "e-commerce",
+    "ecommerce",
+    "site proprio",
+    "marketplace",
+    "instagram shop"
+  ],
+  "atracao_clientes": [
+    "atrair clientes",
+    "atrair mais clientes",
+    "traz novos clientes",
+    "fluxo de clientes",
+    "divulgacao",
+    "mais clientes"
+  ],
+  "fidelizacao": [
+    "fidelizar",
+    "fidelidade",
+    "cliente voltar",
+    "trazer cliente de volta",
+    "programa de pontos",
+    "recompra"
+  ],
+  "estoque": [
+    "estoque",
+    "inventario",
+    "reposicao",
+    "produto em falta",
+    "falta de produto"
+  ],
+  "caixa": [
+    "caixa",
+    "fluxo de caixa",
+    "controle financeiro",
+    "contas a pagar",
+    "contas a receber"
+  ],
+  "gestao": [
+    "gestao",
+    "gerenciar",
+    "organizar o negocio",
+    "processo",
+    "planilha"
+  ],
+  "marketing": [
+    "marketing",
+    "anuncio",
+    "anunciar",
+    "propaganda",
+    "campanha",
+    "trafego pago"
+  ],
+  "logistica": [
+    "logistica",
+    "entrega",
+    "frete",
+    "envio",
+    "delivery"
+  ],
+  "automacao": [
+    "automatizar",
+    "automacao",
+    "bot",
+    "chatbot",
+    "resposta automatica",
+    "inteligencia artificial"
+  ]
 }

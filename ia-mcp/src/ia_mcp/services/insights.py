@@ -23,12 +23,12 @@ class InsightsService:
 
         ordered: dict[str, str] = {}
         for group in grupos:
-            value = outcome.interpretacoes.get(group.id)
+            value = outcome.interpretacoes.get(group.chave)
             if not isinstance(value, str) or not value.strip():
                 raise ServiceUnavailableError(
-                    f"Não foi possível interpretar o grupo '{group.id}'"
+                    f"Não foi possível interpretar o grupo '{group.chave}'"
                 )
-            ordered[group.id] = value.strip()
+            ordered[group.chave] = value.strip()
 
         return outcome.model_copy(update={"interpretacoes": ordered})
 

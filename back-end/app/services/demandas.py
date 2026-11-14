@@ -26,10 +26,11 @@ class DemandaService:
         self._tags_por_dificuldade = vocab["tags_por_dificuldade"]
 
     # ----------------------------------------------------------- caso de uso
-    def registrar(self, ator: Ator, lojista_id: int, respostas: dict, texto_livre: str) -> dict:
+    def registrar(self, ator: Ator, lojista_id: int, respostas: dict, texto_livre: str,
+                  tags: list[str] | None = None) -> dict:
         ator.exige_dono(Perfil.LOJISTA, lojista_id)
         lojista = self._lojistas.obter_ou_falhar(lojista_id)
-        tags, origem_tags = self._classificar(texto_livre, respostas)
+        tags, origem_tags = self._classificar(texto_livre, respostas, tags)
         resultado = self._motor.calcular(perfil_demanda(lojista, respostas, tags),
                                          [perfil_startup(s) for s in self._startups.listar()])
         grupo = self._grupos.por_tags(tags)
@@ -66,11 +67,16 @@ class DemandaService:
                 "ranking_startups": [{**ranking_publico([m])[0], "criterios": m["criterios"]} for m in linhas]}
 
     # --------------------------------------------------------------- helpers
-    def _classificar(self, texto: str, respostas: dict) -> tuple[list[str], str]:
+    def _classificar(self, texto: str, respostas: dict,
+                     tags: list[str] | None = None) -> tuple[list[str], str]:
+        if tags:
+            fornecidas = [t for t in tags if t in self._vocabulario]
+            if fornecidas:
+                return fornecidas, "ia"
         try:
-            tags = [t for t in self._ia.extrair_tags(texto) if t in self._vocabulario]
-            if tags:
-                return tags, "ia"
+            identificadas = [t for t in self._ia.extrair_tags(texto) if t in self._vocabulario]
+            if identificadas:
+                return identificadas, "ia"
         except IAIndisponivel:
             pass
         return list(self._tags_por_dificuldade.get(respostas["dificuldade"], [])), "botoes"

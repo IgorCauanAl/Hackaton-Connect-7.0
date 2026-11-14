@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from ia_mcp.domain.models import DemandaInsight, GrupoInsight
+from ia_mcp.domain.models import GrupoInsight
 from ia_mcp.errors import ProviderUnavailableError
 from ia_mcp.providers.heuristic import HeuristicProvider
 from ia_mcp.vocabulary.loader import Vocabulary
@@ -69,16 +69,16 @@ async def test_summarize_empty_text_raises() -> None:
 async def test_interpret_returns_one_entry_per_group_without_counts() -> None:
     groups = [
         GrupoInsight(
-            id="g1",
+            chave="g1",
             titulo="WhatsApp",
-            tags=["atendimento_whatsapp"],
-            demandas=[
-                DemandaInsight(id="d1", texto="Não consigo responder no WhatsApp."),
-                DemandaInsight(id="d2", texto="Perco vendas à noite."),
-                DemandaInsight(id="d3", texto="Cliente espera muito."),
+            quantidade=3,
+            exemplos=[
+                "Não consigo responder no WhatsApp.",
+                "Perco vendas à noite.",
+                "Cliente espera muito.",
             ],
         ),
-        GrupoInsight(id="g2"),
+        GrupoInsight(chave="g2"),
     ]
 
     outcome = await HeuristicProvider().interpret(groups)
