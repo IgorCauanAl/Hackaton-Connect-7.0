@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app import seed
 from app.api import routes_admin, routes_lojista, routes_startup
@@ -42,6 +44,9 @@ def create_app() -> FastAPI:
     @app.get("/api/saude", tags=["infra"])
     def saude():
         return {"status": "ok"}
+
+    frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
 
     return app
 

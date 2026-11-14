@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Radar de oportunidades | ORVYN</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="/js/admin-common.js" defer></script>
+    <script src="/js/admin-radar.js" defer></script>
+  </head>
+  <body>
+    <aside class="admin-sidebar">
+      <div>
+        <a class="admin-brand" href="/">ORVYN</a>
+        <a class="admin-primary-link" href="/admin-demandas.html">Revisar demandas →</a>
+        <p class="admin-nav-label">Administração</p>
+        <nav class="admin-nav" aria-label="Administração">
+          <a href="/admin.html">▦ <span>Visão geral</span></a>
+          <a href="/admin-demandas.html">▤ <span>Demandas</span></a>
+          <a class="active" href="/admin-radar.html">ϟ <span>Radar de oportunidades</span></a>
+          <a href="/admin-padroes.html">▥ <span>Análise de padrões</span></a>
+        </nav>
+      </div>
+      <div class="admin-profile"><span class="admin-avatar">AC</span><span><strong>Associação Comercial</strong><small>Administração</small></span></div>
+    </aside>
+    <div class="admin-app">
+      <header class="admin-topbar"><span>Oportunidades <span class="crumb-separator">›</span> Radar de oportunidades</span><span class="admin-connection"><i></i> Base atualizada</span></header>
+      <main class="admin-content">
+        <div class="admin-page-heading"><h1>Radar de oportunidades</h1><p>Necessidades recorrentes do varejo</p></div>
+        <div class="admin-error" id="admin-error" role="alert" hidden></div>
+        <div class="radar-highlight" id="radar-highlight" hidden></div>
+        <section class="radar-grid" id="radar-grid" aria-label="Oportunidades mapeadas"></section>
+        <section class="admin-panel related-panel" id="radar-related" hidden>
+          <header class="panel-heading"><div><h2 id="radar-related-title">Demandas relacionadas</h2><p>Demandas associadas a esta oportunidade</p></div><button class="text-button" id="close-radar-related" type="button">Fechar</button></header>
+          <div id="radar-related-list"></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

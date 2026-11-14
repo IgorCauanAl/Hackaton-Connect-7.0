@@ -10,7 +10,8 @@ from app.core.security import Ator, Perfil
 from app.infra.ia_gateway import IAGateway
 from app.infra.repositories import DemandaRepository, InsightRepository
 
-AVISO = "Interpretação sugerida pela IA, sujeita à validação humana."
+AVISO_IA = "Interpretações sugeridas pela IA; valide antes de tomar decisões."
+AVISO_REFERENCIA = "IA indisponível: exibindo sugestões de referência para validação humana."
 SUGESTAO_PADRAO = "Dor recorrente entre lojistas: avaliar solução dedicada."
 
 
@@ -26,23 +27,31 @@ class RadarService:
             interpretacoes = self._ia.interpretar_grupos(
                 [{"chave": g["tag"], "titulo": g["titulo"], "quantidade": g["quantidade"], "exemplos": g["exemplos"]}
                  for g in grupos])
-            origem = "ia"
         except IAIndisponivel:
-            interpretacoes, origem = {}, "referencia"
+            interpretacoes = {}
         maior = max((g["quantidade"] for g in grupos), default=1)
         self._insights.desativar_todos()
         for g in grupos:
-            sugestao = interpretacoes.get(g["tag"]) or (referencia.get(g["grupo_id"]) or {}).get("sugestao_ia") or SUGESTAO_PADRAO
+            interpretacao = str(interpretacoes.get(g["tag"]) or "").strip()
+            sugestao = interpretacao or (referencia.get(g["grupo_id"]) or {}).get("sugestao_ia") or SUGESTAO_PADRAO
             self._insights.criar({"grupo_id": g["grupo_id"], "titulo": g["titulo"], "quantidade": g["quantidade"],
                                   "pontuacao": round(100 * g["quantidade"] / maior), "sugestao_ia": sugestao,
-                                  "origem": origem, "ativo": 1})
+                                  "origem": "ia" if interpretacao else "referencia", "ativo": 1})
         return self.radar(ator)
 
     def radar(self, ator: Ator) -> dict:
         ator.exige(Perfil.ADMIN, Perfil.MCP)
         itens = self._insights.ativos()
-        return {"aviso": AVISO, "radar": [
-            {"grupo_id": i["grupo_id"], "titulo": i["titulo"], "quantidade": i["quantidade"], "pontuacao": i["pontuacao"],
+        origens = {item["origem"] for item in itens}
+        if origens == {"ia"}:
+            aviso = AVISO_IA
+        elif "ia" not in origens:
+            aviso = AVISO_REFERENCIA
+        else:
+            aviso = "Há análises da IA e sugestões de referência; valide todas antes de tomar decisões."
+        return {"aviso": aviso, "radar": [
+            {"grupo_id": i["grupo_id"], "tag": i["tag"], "titulo": i["titulo"],
+             "quantidade": i["quantidade"], "pontuacao": i["pontuacao"],
              "sugestao": i["sugestao_ia"], "origem": i["origem"], "destaque": n == 0, "requer_validacao_humana": True}
             for n, i in enumerate(itens)]}
 

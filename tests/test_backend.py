@@ -18,6 +18,11 @@ class IAFake:
     def interpretar_grupos(self, grupos): return {g["chave"]: f"IA: {g['titulo']}" for g in grupos}
 
 
+class IAParcial(IAFake):
+    def interpretar_grupos(self, grupos):
+        return {"atendimento": "Análise IA para atendimento."}
+
+
 def novo_ambiente(ia=None):
     conn = database.connect(":memory:")
     seed.carregar(conn, Settings())
@@ -120,11 +125,13 @@ class FluxoTests(unittest.TestCase):
 class RadarTests(unittest.TestCase):
     def test_fallback_usa_versao_de_referencia_e_so_validadas(self):
         _, svc = novo_ambiente()
-        radar = svc.radar.gerar_insights(ADMIN)["radar"]
+        resultado = svc.radar.gerar_insights(ADMIN)
+        radar = resultado["radar"]
         self.assertEqual(radar[0]["titulo"], "Atendimento WhatsApp")
         self.assertEqual(radar[0]["quantidade"], 12)  # a pendente não conta
         self.assertTrue(radar[0]["destaque"] and radar[0]["requer_validacao_humana"])
         self.assertEqual(radar[0]["origem"], "referencia")
+        self.assertIn("IA indisponível", resultado["aviso"])
         qtds = [i["quantidade"] for i in radar]
         self.assertEqual(qtds, sorted(qtds, reverse=True))
 
@@ -137,11 +144,24 @@ class RadarTests(unittest.TestCase):
         self.assertEqual(radar[0]["origem"], "ia")
         self.assertTrue(radar[0]["sugestao"].startswith("IA:"))
 
+    def test_interpretacao_parcial_identifica_fallbacks_por_padrao(self):
+        _, svc = novo_ambiente(IAParcial())
+        radar = svc.radar.gerar_insights(ADMIN)["radar"]
+        por_tag = {item["tag"]: item for item in radar}
+        self.assertEqual(por_tag["atendimento"]["origem"], "ia")
+        self.assertEqual(por_tag["estoque"]["origem"], "referencia")
+        self.assertEqual(por_tag["estoque"]["sugestao"], seed.REFERENCIA[2])
+
     def test_mcp_somente_leitura(self):
         _, svc = novo_ambiente()
         svc.radar.gerar_insights(ADMIN)
         mcp = Ator(Perfil.MCP)
-        self.assertGreater(len(svc.mcp.listar_radar(mcp)), 0)
+        radar = svc.mcp.listar_radar(mcp)
+        self.assertGreater(len(radar), 0)
+        atendimento = next(item for item in radar if item["tag"] == "atendimento")
+        self.assertEqual(atendimento["dor"], "Atendimento WhatsApp")
+        self.assertEqual({s["nome"] for s in svc.mcp.buscar_startups(mcp, tag=atendimento["tag"])},
+                         {"ZapBot", "AtendeJá"})
         self.assertEqual({s["nome"] for s in svc.mcp.buscar_startups(mcp, tag="fidelizacao")}, {"FideliPay"})
         self.assertFalse([m for m in dir(svc.mcp) if m.startswith(("criar", "atualizar", "excluir", "validar"))])
         with self.assertRaises(AcessoNegado):

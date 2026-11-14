@@ -50,7 +50,8 @@ class LeituraMcpService:
 
     def listar_radar(self, ator: Ator) -> list[dict]:
         ator.exige(Perfil.ADMIN, Perfil.MCP)
-        return [{"dor": i["titulo"], "quantidade": i["quantidade"], "sugestao_ia": i["sugestao_ia"], "origem": i["origem"]}
+        return [{"dor": i["titulo"], "tag": i["tag"], "quantidade": i["quantidade"],
+                 "sugestao_ia": i["sugestao_ia"], "origem": i["origem"]}
                 for i in self._insights.ativos()]
 
     def buscar_startups(self, ator: Ator, tag: str | None = None, segmento: str | None = None) -> list[dict]:

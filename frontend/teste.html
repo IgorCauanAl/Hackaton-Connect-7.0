@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8fafc">
+    <title>Avaliação do teste | ORVYN</title>
+    <link rel="stylesheet" href="/css/test.css">
+    <script src="/js/test.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-main">
+        <a class="brand" href="/" aria-label="ORVYN - início"><span class="brand-mark">O</span><span>ORVYN</span></a>
+        <a class="new-demand-button" href="/chat.html">＋ Nova necessidade</a>
+        <p class="nav-caption">Workspace</p>
+        <nav class="side-nav" aria-label="Workspace">
+          <a href="/" class="nav-link">⌂ <span>Visão geral</span></a>
+          <a href="/chat.html" class="nav-link active">⌕ <span>Encontrar soluções</span></a>
+          <a href="/" class="nav-link">⚙ <span>Configurações</span></a>
+        </nav>
+      </div>
+      <div class="sidebar-profile">
+        <span class="avatar" id="profile-initials">--</span>
+        <span class="profile-copy"><strong id="profile-name">Carregando perfil...</strong><small>Lojista</small></span>
+      </div>
+    </aside>
+    <div class="app-area">
+      <header class="topbar">
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Início</a><span>›</span><a href="/chat.html">Encontrar soluções</a><span>›</span><strong>Avaliação do teste</strong></nav>
+        <span class="connection-indicator"><span class="connection-dot"></span>Conectado</span>
+      </header>
+      <main class="page-content">
+        <a class="back-link" id="back-link" href="/chat.html">← Voltar aos resultados</a>
+        <div class="page-error" id="page-error" role="alert" hidden></div>
+        <div class="loading-state" id="loading-state" role="status">Carregando teste...</div>
+        <div id="test-content" hidden>
+          <section class="test-summary">
+            <div class="summary-heading">
+              <div>
+                <div class="title-line"><h1>Avaliação do teste</h1><span class="status-badge" id="test-status"></span></div>
+                <p id="test-caption"></p>
+              </div>
+              <span class="demo-badge">Registro demonstrativo</span>
+            </div>
+            <div class="summary-grid">
+              <div><span class="metric-label">Startup</span><strong id="startup-name"></strong><small id="startup-solution"></small></div>
+              <div><span class="metric-label">Oportunidade</span><strong id="opportunity-title"></strong><small>Demanda enviada com autorização do lojista</small></div>
+              <div><span class="metric-label">Duração</span><strong id="test-duration"></strong><small id="test-date"></small></div>
+            </div>
+          </section>
+
+          <section class="feedback-card" id="feedback-card" hidden>
+            <header class="feedback-heading">
+              <div><h2>Feedback do lojista</h2><p>Registro demonstrativo pré-preenchido para a apresentação</p></div>
+              <span class="status-badge complete">Avaliação finalizada</span>
+            </header>
+            <div class="feedback-grid">
+              <div class="feedback-item"><span>A solução atendeu à necessidade?</span><strong id="feedback-solved"></strong></div>
+              <div class="feedback-item"><span>Facilidade de utilização</span><strong id="feedback-ease"></strong></div>
+              <div class="feedback-item"><span>Impacto percebido</span><strong id="feedback-impact"></strong></div>
+              <div class="feedback-item"><span>Recomendaria a solução?</span><strong id="feedback-recommend"></strong></div>
+            </div>
+            <div class="comment-box"><span>Comentário</span><blockquote id="feedback-comment"></blockquote><small>Registrado como demonstração</small></div>
+          </section>
+
+          <section class="pending-card" id="pending-card" hidden>
+            <h2>Período de teste em andamento</h2>
+            <p>O teste foi solicitado e ficará registrado por <strong id="pending-days">15 dias</strong>.</p>
+            <div class="demo-notice">A ação abaixo é apenas para a demonstração: ela conclui o teste imediatamente e grava um feedback pré-preenchido.</div>
+            <button class="primary-button" id="complete-demo" type="button">Simular conclusão do teste</button>
+            <p class="action-error" id="action-error" role="alert"></p>
+          </section>
+          <div class="bottom-actions">
+            <a class="secondary-link" href="/resultados.html" id="results-link">Voltar às soluções</a>
+            <a class="primary-link" href="/chat.html">Registrar outra necessidade</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

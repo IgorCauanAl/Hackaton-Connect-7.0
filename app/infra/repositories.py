@@ -233,7 +233,9 @@ class InsightRepository(BaseRepository):
         self.conn.execute("UPDATE insights SET ativo = 0")
 
     def ativos(self) -> list[dict]:
-        return self._todos("SELECT * FROM insights WHERE ativo=1 ORDER BY quantidade DESC, titulo")
+        return self._todos(
+            "SELECT i.*, g.tag FROM insights i LEFT JOIN grupos g ON g.id=i.grupo_id "
+            "WHERE i.ativo=1 ORDER BY i.quantidade DESC, i.titulo")
 
     def referencia_por_grupo(self) -> dict[int, dict]:
         return {r["grupo_id"]: r for r in self._todos("SELECT * FROM insights WHERE origem='referencia' ORDER BY id")}
