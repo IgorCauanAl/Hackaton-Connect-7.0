@@ -1,0 +1,24 @@
+{
+  "corte": 50,
+  "max_recomendacoes": 3,
+  "pesos": {
+    "dor_especifica": 25,
+    "tags_ia": 20,
+    "objetivo": 10,
+    "ramo": 10,
+    "canais": 10,
+    "preco": 10,
+    "ferramenta_atual": 10,
+    "urgencia": 5
+  },
+  "frases": {
+    "dor_especifica": {"alto": "Resolve exatamente a dificuldade relatada", "medio": "Atende parcialmente a dificuldade relatada", "baixo": "Não é focada na dificuldade relatada"},
+    "tags_ia": {"alto": "Especializada nos temas do seu relato ({detalhe})", "medio": "Cobre parte dos temas do seu relato ({detalhe})", "baixo": "Pouca aderência aos temas do seu relato"},
+    "objetivo": {"alto": "Alinhada ao seu objetivo principal", "medio": "Parcialmente alinhada ao seu objetivo", "baixo": "Objetivo principal diferente"},
+    "ramo": {"alto": "Experiência com o seu ramo", "medio": "Atende varejo em geral", "baixo": "Sem experiência declarada no seu ramo"},
+    "canais": {"alto": "Integra com os seus canais de venda", "medio": "Integra com parte dos seus canais", "baixo": "Pouca integração com seus canais"},
+    "preco": {"alto": "Cabe no seu orçamento mensal", "medio": "Pode ultrapassar parte do orçamento", "baixo": "Acima do orçamento informado"},
+    "ferramenta_atual": {"alto": "Não duplica o que você já usa", "medio": "Pode se sobrepor ao que você já usa", "baixo": "Duplica uma ferramenta que você já tem"},
+    "urgencia": {"alto": "Implantação dentro do seu prazo", "medio": "Implantação um pouco acima do prazo", "baixo": "Implantação além do prazo desejado"}
+  }
+}
