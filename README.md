@@ -1,178 +1,289 @@
-# FACESP Match — InovaVarejo
+# InovaVarejo
 
-MVP do desafio Connect 7.0: conecta demandas do varejo a soluções tecnológicas.
-O repositório reúne três serviços Python e um frontend React:
+**InovaVarejo** é um sistema demo que tem como objetivo conectar pequenos varejistas a soluções de startups compatíveis com suas necessidades reais, usando um diagnóstico guiado, classificação por IA via protocolo MCP, matching determinístico e um ciclo de teste/feedback. Quando não há solução adequada o problema é armazenado no sistema, a demanda é transformada em oportunidade sendo enviada para CONNECT para futuros hackatons e podendo ser visualizada por outras startups.
 
-| Componente | Pasta | Porta | Papel |
-| --- | --- | --- | --- |
-| Frontend React | `orquestrador/frontend` | servido pelo orquestrador (`8200`) | telas do lojista, da startup e da associação |
-| Orquestrador (BFF) | `orquestrador` | `8200` | compõe os fluxos, valida contratos, centraliza erros e serve o frontend |
-| IA/MCP | `ia-mcp` | `8100` | classificação/resumo/insights por IA + ferramentas MCP somente leitura |
-| Backend operacional | `back-end` | `8000` | fonte da verdade: matching, persistência, autorização e CRUDs |
+Desenvolvido para o desafio **FACESP — Federação das Associações Comerciais do Estado de São Paulo**, no Connect 7.0: *“FACESP: Conectar as demandas do varejo às soluções tecnológicas
 
-O frontend **nunca** chama o backend diretamente: leituras passam pelo
-pass-through `GET /api/*` e os fluxos compostos/escritas por `/orquestracao/*`
-no orquestrador.
+Como lojistas e associações comerciais podem usar tecnologia para encontrar e testar soluções de startups que atendam às suas necessidades e, quando não houver uma solução adequada, transformar essas necessidades em oportunidades de desenvolvimento conjunto?”*.
 
-## Execução integrada
+## 1. Problema que resolvemos
 
-Pré-requisitos: Python 3.12+, [uv](https://docs.astral.sh/uv/), Node.js 20+ e
-`npm`.
+Pequenos varejistas de lojas físicas, digitais e híbridas têm dificuldade para descobrir, comparar e testar tecnologias que resolvam suas dores reais (atendimento fora do horário, vendas online, estoque, fidelização, etc.). As associações comerciais, por sua vez, não têm um mecanismo sistemático para qualificar essas demandas e conectá-las a startups — nem para transformar demandas sem resposta em oportunidades de desenvolvimento conjunto.
 
-```bash
-cp .env.example .env      # ajuste portas/URLs se necessário
-./scripts/dev.sh          # sobe backend, IA/MCP e orquestrador + frontend
+O InovaVarejo cria essa ponte: o lojista descreve sua necessidade, a plataforma identifica soluções compatíveis com justificativa por critério, permite testar por 15 dias e, quando não há match, encaminha a demanda qualificada à associação e às startups.
+
+## 2. Arquitetura — Monólito modular
+
+O backend operacional é um monólito modular: um único processo/deploy, mas organizado em módulos com fronteiras claras (Repository, Strategy, Ports & Adapters, Composition Root). Serviços auxiliares (IA/MCP e orquestrador) são processos independentes que se comunicam por HTTP, sem acesso direto ao banco.
+
+### Diagrama da arquitetura
+
+```text
+┌──────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  Frontend    │────▶│  Orquestrador    │────▶│  Backend operac. │
+│  React/Vite  │     │  (BFF, :8200)    │     │  (monólito, :8000)│
+│  (:8200)     │     │                  │────▶│                  │
+└──────────────┘     └──────────────────┘     └────────┬─────────┘
+                                                       │
+                                                       ▼
+                                              ┌──────────────────┐
+                                              │  IA/MCP          │
+                                              │  (:8100)         │
+                                              │  FastAPI+FastMCP │
+                                              └──────────────────┘
 ```
 
-O script:
+### Componentes
 
-- carrega o `.env` da raiz;
-- recusa iniciar se `8000`, `8100` ou `8200` já estiverem em uso (não mata
-  processos de outras pessoas);
-- instala dependências e gera o build do frontend quando necessário;
-- espera os health checks e então libera o terminal;
-- ao receber `Ctrl+C`, encerra **apenas** os processos que ele iniciou.
+| Componente | Pasta | Porta | Responsabilidade |
+|---|---|---|---|
+| Frontend React | `orquestrador/frontend` | Servido em 8200 | Telas do lojista, startup e associação |
+| Orquestrador (BFF) | `orquestrador` | 8200 | Compõe fluxos, valida contratos, centraliza erros, idempotência e serve o frontend |
+| IA/MCP | `ia-mcp` | 8100 | Classificação, resumo e insights por IA + ferramentas MCP somente leitura |
+| Backend operacional | `back-end` | 8000 | Fonte da verdade: matching, persistência, autorização e CRUDs |
 
-Depois acesse:
+### Monólito modular (backend)
 
-- Aplicação: <http://localhost:8200/>
-- Orquestrador: <http://localhost:8200/health>
-- IA/MCP: <http://localhost:8100/ia/*> e MCP em `http://localhost:8100/mcp/`
-- Backend: <http://localhost:8000/api/saude>
+Camadas com dependências apontando apenas para dentro:
 
-Para forçar a reconstrução do frontend: `InovaVarejo_FORCE_BUILD=1 ./scripts/dev.sh`.
-
-### Frontend
-
-O frontend está em `orquestrador/frontend` (React 19 + Vite, multi-página).
-Cada tela mantém seu HTML/CSS, preservando as URLs originais
-(`/chat.html`, `/resultados.html`, ...). O build em `dist/` é servido pelo
-orquestrador na mesma origem, então não há CORS no caminho normal.
-
-```bash
-cd orquestrador/frontend
-npm install
-npm run build
-npm run dev          # desenvolvimento em http://localhost:5173 (proxy para :8200)
+```text
+api/         → rotas finas, schemas Pydantic, deps (ator por header)
+services/    → casos de uso + regras + autorização por perfil
+domain/      → matching (Strategy por critério, puro/determinístico) e roteiro do chat
+infra/       → repositories (único lugar com SQL), database, ia_gateway (porta + adaptadores)
+container.py → composition root (DI manual)
+core/        → config, erros, segurança
+config/      → matching.json (pesos, corte 50, frases) e vocabulario.json (tags)
 ```
 
-Os arquivos estáticos originais foram preservados em
-`orquestrador/frontend/legacy-static/` apenas como referência.
+**Padrões aplicados:** Repository, Strategy (critérios de matching), Ports & Adapters + Null Object (IA), Composition Root e exceções de domínio → HTTP.
 
-## Configuração da IA
+O backend nunca é chamado diretamente pelo frontend: leituras passam pelo pass-through `GET /api/*` do orquestrador e fluxos compostos/escritas por `/orquestracao/*`.
 
-Toda a configuração vem de variáveis de ambiente. Os nomes canônicos são
-`AI_PROVIDER`, `AI_API_KEY`, `AI_MODEL`, `AI_BASE_URL` e `AI_TIMEOUT`
-(os nomes prefixados `IA_MCP_AI_*` também são aceitos e têm precedência).
+## 3. Ferramentas e tecnologias
 
-- **Sem chave** (`AI_API_KEY` vazio): o serviço usa o classificador heurístico
-  local; o sistema funciona offline.
-- **Com chave**: `AI_PROVIDER=openai_compatible` (ou `auto`) usa o provedor
-  OpenAI-compatible configurado em `AI_BASE_URL`/`AI_MODEL`. Falhas de
-  autenticação, timeout ou indisponibilidade caem automaticamente no
-  heurístico/fallback do backend, sem bloquear o fluxo.
+| Camada | Tecnologias |
+|---|---|
+| Backend | Python 3.12+, FastAPI, SQLite, Pydantic, Uvicorn |
+| IA/MCP | Python 3.12+, FastAPI, FastMCP (Streamable HTTP), httpx, provedor OpenAI-compatible (Groq/Gemini/Ollama) com fallback heurístico |
+| Orquestrador | Python 3.12+, FastAPI, httpx, FastMCP Client |
+| Frontend | React 19, Vite 8 (multi-página), JavaScript (ESM) |
+| Gestão de dependências | uv (Python), npm (Node) |
+| Testes | unittest (backend), pytest (IA/MCP e orquestrador), integração ponta a ponta real (`scripts/integration_check.py`) |
+| Configuração | 100% via variáveis de ambiente (`FACESP_*`, `IA_MCP_*`, `ORQ_*`, `AI_*`) |
 
-Exemplo com Groq:
+## 4. Como o sistema atende aos critérios do desafio
 
-```bash
-AI_PROVIDER=auto
-AI_BASE_URL=https://api.groq.com/openai/v1
-AI_MODEL=openai/gpt-oss-120b
-AI_API_KEY=<sua-chave>
-AI_TIMEOUT=20
+### Art. 4º — Responder diretamente ao desafio (I)
+
+- Diagnóstico guiado de 6 perguntas + texto livre → classificação por IA em tags oficiais → matching com startups → ranking com índice 0–100 e justificativa por critério.
+- Quando não há match (`sem_match=true`), a demanda vai para a fila de curadoria e pode ser validada/encaminhada, transformando a necessidade em oportunidade de desenvolvimento conjunto.
+- Painel da associação: fila de curadoria, validação, encaminhamento, radar de padrões e análise de padrões (insights).
+
+### Art. 4º — Caráter inovador, criativo e original (II)
+
+- Combina IA (classificação textual) com matching determinístico e explicável (8 critérios com pesos e motivos).
+- Ferramentas MCP somente leitura (`listar_radar`, `buscar_startups`) expõem dados reais do backend para clientes MCP (IDEs/agentes).
+- Síntese em linguagem natural (“resposta do assistente”) gerada a partir dos dados existentes, sem inventar nota/peso.
+
+### Art. 4º — Aplicabilidade prática e viabilidade (III)
+
+- Roda localmente com um comando (`./scripts/dev.sh`), sem serviços externos obrigatórios (funciona offline com heurístico).
+- Monólito modular facilita manutenção e evolução por módulo.
+- Frontend multi-página preserva URLs e layout original; pass-through `/api/*` evita CORS e mantém o backend como autoridade.
+- Idempotência (`Idempotency-Key`), erros centralizados e trilha de execução facilitam operação e depuração.
+
+### Art. 4º — Impacto positivo (IV)
+
+- Melhora a descoberta e comparação de soluções para o lojista (ranking com justificativas por critério).
+- Permite teste de 15 dias com feedback demonstrativo.
+- Associações reaproveitam a abordagem (radar de padrões, insights com fallback de referência).
+- Startups recebem relatório anonimizado/completo com demanda, compatibilidade e sinal de mercado.
+
+### Critérios de sucesso do desafio
+
+**Lojista entende por que uma solução é pertinente:**
+- Índice 0–100.
+- Top 3 recomendações.
+- Critérios com pontuação e motivo.
+- Síntese do assistente.
+- Página de detalhes.
+
+**Startup recebe informações suficientes:**
+
+Relatório em 6 blocos:
+1. Resumo.
+2. Perfil da loja.
+3. Dor/contexto.
+4. Compatibilidade.
+5. Sinal de mercado.
+6. Próximo passo.
+
+O relatório pode ser anonimizado ou completo, conforme consentimento.
+
+**Outra associação reaproveita com ajustes locais:**
+- Radar de padrões.
+- Insights com fallback determinístico.
+- Configuração 100% por ambiente.
+
+## 5. Fluxo de demonstração (demo)
+
+A demonstração segue um fluxo previsível: o texto livre do lojista já vem preenchido e o teste aparece como previamente concluído, com feedbacks preparados. Isso garante repetibilidade da apresentação sem depender de serviços externos.
+
+### Participantes
+
+**Lojista**
+- Apresenta a necessidade.
+- Consulta startups recomendadas.
+- Acompanha testes e feedbacks.
+
+**Associação**
+- Realiza a curadoria das demandas.
+- Valida demandas.
+- Gera insights.
+- Consulta o radar de oportunidades.
+- Encaminha oportunidades às startups.
+
+**Startup**
+- Recebe oportunidades encaminhadas.
+- Consulta relatórios.
+- Recebe solicitações de teste.
+
+### Etapas
+
+1. **Identificação da necessidade** — atendimento guiado com 6 perguntas estruturadas (botões) + campo de texto livre.
+
+2. **Classificação por IA** — o serviço de IA interpreta o texto e as respostas, retornando tags/categorias estruturadas. Se a IA falhar, usa-se fallback por botões.
+
+3. **Índice de compatibilidade** — o backend compara a demanda com as startups cadastradas e devolve índice 0–100, top 3, pontuação por critério e justificativas.
+
+4. **Curadoria** — a associação consulta a fila, valida demandas e prepara os dados para análise coletiva.
+
+5. **Padrões e insights** — a associação aciona “Gerar insights”; a IA interpreta grupos de demandas e identifica dores recorrentes. Se indisponível, usa-se o fallback de referência pré-gerado.
+
+6. **Radar de Oportunidades** — organiza as necessidades identificadas (problema, quantidade, categoria, interpretação da IA, startups relacionadas). Visão da associação.
+
+7. **Encaminhamento** — a associação encaminha oportunidades às startups, que passam a ver relatórios com o contexto da demanda.
+
+8. **Teste (15 dias)** — solicitação de teste com autorização. Na demo, o teste aparece como concluído.
+
+9. **Feedback e encerramento** — feedback do lojista sobre a solução testada, fechando o ciclo:
+
+```text
+Necessidade → Classificação → Compatibilidade → Curadoria
+     → Oportunidade → Startup → Teste → Feedback
 ```
 
-A chave fica apenas no ambiente do serviço IA/MCP. Ela não é enviada ao
-frontend, não aparece nas respostas HTTP e não é logada.
+## 6. Como executar
 
-## Testes
+### Integrado (recomendado)
 
-Por serviço:
+```bash
+cp .env.example .env
+./scripts/dev.sh
+```
+
+O script sobe backend (`:8000`), IA/MCP (`:8100`) e orquestrador + frontend (`:8200`), espera os health checks e encerra tudo com `Ctrl+C`.
+
+### Por serviço
+
+**Backend**
+
+```bash
+cd back-end
+python3 -m app.seed
+uvicorn app.main:app --reload
+```
+
+**IA/MCP**
+
+```bash
+cd ia-mcp
+uv sync
+uv run uvicorn ia_mcp.main:app --port 8100
+```
+
+**Orquestrador + frontend**
+
+```bash
+cd orquestrador
+uv sync
+cd frontend && npm install && npm run build && cd ..
+uv run uvicorn orquestrador.main:app --port 8200
+```
+
+### Testes
 
 ```bash
 cd back-end      && python3 -m unittest discover -s tests -v
 cd ia-mcp        && uv run pytest
 cd orquestrador  && uv run pytest
+cd orquestrador  && uv run python ../scripts/integration_check.py
 ```
 
-Verificação de integração real (com os serviços no ar):
+## 7. Configuração da IA (chave de API)
 
-```bash
-cd orquestrador
-uv run python ../scripts/integration_check.py
+A chave fica apenas no ambiente do serviço IA/MCP (nunca no frontend).
+
+Exemplo de configuração no `.env` (raiz) ou `ia-mcp/.env`:
+
+```env
+AI_PROVIDER=auto            # auto | openai_compatible | heuristic
+AI_BASE_URL=https://api.groq.com/openai/v1
+AI_MODEL=openai/gpt-oss-120b
+AI_API_KEY=sua-chave-aqui
+AI_TIMEOUT=20
 ```
 
-O script exercita 10 cenários ponta a ponta, incluindo fallback com IA fora do
-ar e as ferramentas MCP via cliente FastMCP real. Ele grava demandas, teste e
-relatório de demonstração no banco local (`back-end/facesp_demo.db`). Para
-testar indisponibilidade, sobe instâncias temporárias isoladas nas portas
-`8199`, `8098` e `8298` (usando uma cópia do banco em `/tmp/opencode`), sem
-tocar nos serviços em execução.
+Nomes prefixados `IA_MCP_AI_*` também são aceitos (precedência).
 
-## Backend operacional
+Sem chave, o sistema usa o classificador heurístico local e funciona offline. Falhas de autenticação/timeout caem no fallback do backend sem bloquear o fluxo.
 
-Python + FastAPI + SQLite. A IA e o MCP são módulos independentes: aqui existe
-a **porta** (`IAGateway`) e os fallbacks determinísticos.
+## 8. Endpoints principais
 
-### Rodar isoladamente
+### Pass-through (somente GET)
 
-```bash
-pip install -r requirements.txt
-python -m app.seed                 # apaga e recria o banco da demo
-uvicorn app.main:app --reload      # também faz o seed sozinho se o banco estiver vazio
-python -m unittest discover -s tests -v
+```text
+/api/{caminho}
 ```
 
-Variáveis (`.env.example`): `FACESP_DB_PATH`, `FACESP_IA_URL` (vazio = IA
-indisponível, usa fallbacks), `FACESP_IA_TIMEOUT`.
+### Fluxos compostos
 
-### Camadas (dependências só apontam para dentro)
-
+```text
+/orquestracao/demandas
+/orquestracao/demandas/{id}/matching
+/orquestracao/demandas/{id}/validar
+/orquestracao/insights
+/orquestracao/radar
+/orquestracao/padroes
+/orquestracao/mcp/radar
+/orquestracao/mcp/startups
+/orquestracao/testes
+/orquestracao/demandas/{id}/encaminhar
+/orquestracao/relatorios/{id}
 ```
-api/        FastAPI: rotas finas, schemas Pydantic, deps (ator por header)
-services/   casos de uso + regras + autorização por perfil
-domain/     matching (Strategy por critério, puro/determinístico) e roteiro do chat
-infra/      repositories (único lugar com SQL), database, ia_gateway (porta + adaptadores)
-container.py  composition root (DI manual)     core/  config, erros, segurança
-config/     matching.json (pesos, corte 50, frases de motivo) e vocabulario.json (tags)
+
+### Frontend
+
+```text
+/
+/chat.html
+/resultados.html
+/solucao.html
+/teste.html
+/oportunidade.html
+/admin*.html
 ```
 
-Padrões: Repository, Strategy (critérios), Ports & Adapters + Null Object (IA),
-Composition Root, exceções de domínio → HTTP.
+## 9. Estrutura do repositório
 
-### Acesso (demo)
-
-Headers: `X-Perfil: lojista|startup|admin|mcp` e `X-Ator-Id: <id do lojista/startup>`.
-
-### Endpoints
-
-| Quem | Método e rota |
-|---|---|
-| Lojista | `GET /api/chat/roteiro` · `GET /api/lojistas` · `GET /api/lojistas/{id}` · `POST /api/demandas` · `GET /api/demandas/{id}/matching` · `POST /api/testes` · `POST /api/testes/{id}/feedback-demo` · `GET /api/feedbacks` |
-| Startup | `GET /api/startups[/{id}]` · `GET /api/startups/{id}/dashboard` · `GET /api/startups/{id}/oportunidades` · `GET /api/relatorios/{id}?versao=anonimizada\|completa` |
-| Associação | `GET /api/admin/dashboard` · `GET /api/admin/demandas?status=` · `GET /api/admin/demandas/{id}` · `POST .../validar` · `POST .../encaminhar {startup_id}` · `POST /api/admin/insights/gerar` · `GET /api/admin/radar` · `GET /api/admin/radar/{grupo_id}/demandas` · `GET /api/admin/feedbacks` |
-| MCP (só leitura) | `GET /api/mcp/radar` · `GET /api/mcp/startups?tag=&segmento=` (ou importe `LeituraMcpService`) |
-
-### Regras principais
-
-- **Matching** (`domain/matching.py`): 8 critérios com pesos em
-  `config/matching.json` (soma 100), índice 0–100, corte 50, até 3 resultados,
-  desempate por nome. A IA só fornece as tags; o cálculo é do backend.
-- **Fallbacks**: IA falhou → tags vêm das respostas dos botões; resumo = texto
-  truncado; insights → versão de referência pré-gerada (`origem: "referencia"`).
-- **Insights**: só demandas `validada`/`encaminhada` entram. Quantidades e
-  pontuação são calculadas pelo código; a IA só interpreta.
-- **Sem match**: demanda vai para a fila (`sem_match=true`) e entra nos insights
-  quando validada.
-- **Teste**: exige `autorizacao=true` e startup entre as recomendadas; 15 dias;
-  `solicitado → concluido`.
-- **Relatório (6 blocos)**: anonimizado (ramo, tipo, porte, região, tags,
-  resumo) ou completo (só com consentimento do lojista).
-
-### Contrato que a IA precisa atender (HTTP em `FACESP_IA_URL`)
-
-```
-POST /ia/classificar {"texto"}  -> {"tags": [..]}      (tags fora de config/vocabulario.json são descartadas)
-POST /ia/resumir     {"texto"}  -> {"resumo": ".."}
-POST /ia/insights    {"grupos": [{"chave","titulo","quantidade","exemplos"}]} -> {"interpretacoes": {chave: ".."}}
+```text
+.
+├── back-end/          # Monólito modular FastAPI + SQLite
+├── ia-mcp/            # FastAPI + FastMCP (IA e ferramentas MCP)
+├── orquestrador/      # BFF + frontend React (Vite)
+│   └── frontend/
+├── scripts/           # dev.sh e integration_check.py
+├── .env.example
+└── README.md
 ```
