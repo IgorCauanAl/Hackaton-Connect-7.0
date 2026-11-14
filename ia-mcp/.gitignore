@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# Ferramentas
+.coverage
+htmlcov/

@@ -1,0 +1,9 @@
+{
+  "_comment": "Sinônimos usados apenas pelo fallback heurístico local. Não substituem o vocabulário do backend; tags desconhecidas são ignoradas no carregamento.",
+  "atendimento_whatsapp": ["whatsapp", "zap", "mensagem", "chat"],
+  "automacao_atendimento": ["automatizar", "automacao", "bot", "resposta automatica", "chatbot"],
+  "atendimento_fora_horario": ["fora do horario", "fora do expediente", "24 horas", "apos o horario"],
+  "conversao_vendas": ["conversao de vendas", "converter", "perco vendas", "fechar venda", "taxa de conversao"],
+  "controle_estoque": ["estoque", "inventario", "reposicao", "produto em falta"],
+  "pagamentos": ["pagamento", "pix", "cartao", "maquininha", "cobranca"]
+}
