@@ -41,7 +41,7 @@ Headers: `X-Perfil: lojista|startup|admin|mcp` e `X-Ator-Id: <id do lojista/star
 - **Teste**: exige `autorizacao=true` e startup entre as recomendadas; 15 dias; `solicitado → concluido`.
 - **Relatório (6 blocos)**: anonimizado (ramo, tipo, porte, região, tags, resumo) ou completo (só com consentimento do lojista).
 
-## Contrato que o colega de IA precisa atender (HTTP em `FACESP_IA_URL`)
+## Contrato que  IA precisa atender (HTTP em `FACESP_IA_URL`)
 ```
 POST /ia/classificar {"texto"}  -> {"tags": [..]}      (tags fora de config/vocabulario.json são descartadas)
 POST /ia/resumir     {"texto"}  -> {"resumo": ".."}
