@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f9fc">
+    <title>Oportunidade recebida | ORVYN</title>
+    <link rel="stylesheet" href="/css/opportunity.css">
+    <script src="/js/opportunity.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-main">
+        <a class="brand" href="/" aria-label="ORVYN - início">
+          <span class="brand-mark" aria-hidden="true">O</span>
+          <span>ORVYN</span>
+        </a>
+        <p class="nav-caption">Painel da startup</p>
+        <nav class="side-nav" aria-label="Painel da startup">
+          <a href="/oportunidade.html" class="nav-link active" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">▣</span>
+            Oportunidade recebida
+          </a>
+          <a href="/" class="nav-link">
+            <span class="nav-icon" aria-hidden="true">⚙</span>
+            Configurações
+          </a>
+        </nav>
+      </div>
+      <div class="sidebar-profile">
+        <span class="avatar" id="profile-initials">--</span>
+        <span class="profile-copy">
+          <strong id="profile-name">Carregando startup...</strong>
+          <small>Startup</small>
+        </span>
+      </div>
+    </aside>
+
+    <div class="app-area">
+      <header class="topbar">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/" aria-label="Início">▦</a>
+          <span aria-hidden="true">›</span>
+          <strong>Oportunidade recebida</strong>
+        </nav>
+        <span class="connection-indicator">
+          <span class="connection-dot" aria-hidden="true"></span>
+          Conectado
+        </span>
+      </header>
+
+      <main class="page-content">
+        <div class="page-heading">
+          <span class="forwarded-label"><span aria-hidden="true">♢</span> Relatório encaminhado pela associação</span>
+          <h1>Oportunidade recebida</h1>
+          <p>Necessidade comercial encaminhada pela associação</p>
+        </div>
+
+        <label class="opportunity-picker" id="opportunity-picker-wrap" for="opportunity-picker" hidden>
+          <span>Oportunidade</span>
+          <select id="opportunity-picker"></select>
+        </label>
+
+        <div class="page-error" id="page-error" role="alert" hidden></div>
+        <div class="loading-state" id="loading-state" role="status">Carregando oportunidades...</div>
+        <div id="opportunity-content" hidden>
+          <section class="summary-card" aria-label="Resumo da oportunidade">
+            <div class="summary-item">
+              <span class="summary-label">Oportunidade</span>
+              <strong id="summary-title"></strong>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Segmento</span>
+              <strong id="summary-segment"></strong>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Origem</span>
+              <strong>Associação comercial</strong>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Status</span>
+              <span class="status-badge" id="summary-status"></span>
+            </div>
+          </section>
+
+          <section class="report-card" aria-label="Relatório executivo de oportunidade">
+            <header class="report-header">
+              <div>
+                <h2>Relatório Executivo de Oportunidade</h2>
+                <p>Documento de análise técnica e alinhamento da demanda</p>
+              </div>
+              <span class="privacy-badge"><span aria-hidden="true">♙</span> Dados do lojista anonimizados</span>
+            </header>
+
+            <div class="report-sections">
+              <article class="report-section">
+                <h3><span>1.</span> Problema identificado</h3>
+                <p id="report-problem"></p>
+              </article>
+              <article class="report-section">
+                <h3><span>2.</span> Necessidade do lojista</h3>
+                <p id="report-need"></p>
+              </article>
+              <article class="report-section">
+                <h3><span>3.</span> Contexto comercial</h3>
+                <p id="report-context"></p>
+              </article>
+              <article class="report-section">
+                <h3><span>4.</span> Oportunidade de aplicação</h3>
+                <p id="report-application"></p>
+              </article>
+            </div>
+
+            <footer class="report-footer">
+              <span>Emitido via ecossistema ORVYN</span>
+              <span>Somente visualização</span>
+            </footer>
+          </section>
+        </div>
+
+        <section class="empty-state" id="empty-state" hidden>
+          <span class="empty-icon" aria-hidden="true">▣</span>
+          <h2>Nenhuma oportunidade recebida ainda</h2>
+          <p>Quando a associação encaminhar uma demanda para sua startup, o relatório aparecerá aqui.</p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

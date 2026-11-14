@@ -42,8 +42,18 @@ substituídos por `httpx.MockTransport` e dublês.
 
 ## Configuração
 
-Todas as variáveis usam o prefixo `IA_MCP_`. Veja `.env.example` para a lista
-completa. Nenhuma URL, credencial ou caminho é fixado no código.
+A configuração vem de variáveis de ambiente e de um `.env` opcional. Os nomes
+canônicos do provedor são `AI_PROVIDER`, `AI_BASE_URL`, `AI_API_KEY`,
+`AI_MODEL` e `AI_TIMEOUT`; os nomes prefixados `IA_MCP_AI_*` também são aceitos
+e têm precedência quando ambos existem. O restante usa o prefixo `IA_MCP_`.
+Veja `.env.example` para a lista completa. Nenhuma URL, credencial ou caminho é
+fixado no código.
+
+Sem `AI_API_KEY`/`AI_MODEL`, o serviço usa o classificador heurístico local e
+funciona offline. A chave nunca é logada nem devolvida nas respostas HTTP.
+
+Para subir backend + IA/MCP + orquestrador de uma vez, use `../scripts/dev.sh`
+na raiz do repositório.
 
 ## Contratos
 

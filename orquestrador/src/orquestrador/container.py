@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from orquestrador.services.demandas import ServicoDemandas
 from orquestrador.services.insights import ServicoInsights
+from orquestrador.services.mcp import ServicoMCP
 from orquestrador.services.relatorios import ServicoRelatorios
 from orquestrador.services.testes import ServicoTestes
 
@@ -16,6 +17,7 @@ class Container:
     insights: ServicoInsights
     testes: ServicoTestes
     relatorios: ServicoRelatorios
+    mcp: ServicoMCP
 
 
 __all__ = ["Container"]

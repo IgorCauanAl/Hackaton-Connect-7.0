@@ -6,8 +6,13 @@ ou caminho fixo no código.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# ``orquestrador/frontend/dist`` (o pacote Python fica em ``orquestrador/src``).
+DEFAULT_FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
 
 class Settings(BaseSettings):
@@ -23,12 +28,23 @@ class Settings(BaseSettings):
 
     # ------------------------------------------------------------------ backend
     backend_base_url: str = "http://localhost:8000"
-    backend_timeout_seconds: float = Field(default=10.0, gt=0)
+    # Precisa cobrir a chamada do backend ao IA/MCP (fallback/IA) com folga.
+    backend_timeout_seconds: float = Field(default=40.0, gt=0)
 
     # ----------------------------------------------------------------- IA/MCP
     # Precisa acomodar o modelo de IA configurado no IA/MCP (20s por padrão).
     ia_base_url: str = "http://localhost:8100"
-    ia_timeout_seconds: float = Field(default=25.0, gt=0)
+    ia_timeout_seconds: float = Field(default=30.0, gt=0)
+
+    # ------------------------------------------------------------- MCP (FastMCP)
+    # Endpoint Streamable HTTP exposto pelo IA/MCP (``/mcp/``).
+    mcp_url: str = "http://localhost:8100/mcp/"
+    mcp_timeout_seconds: float = Field(default=10.0, gt=0)
+
+    # ----------------------------------------------------------------- frontend
+    # Quando o build do Vite existe, o orquestrador serve a SPA na mesma origem.
+    frontend_enabled: bool = True
+    frontend_dir: Path = DEFAULT_FRONTEND_DIR
 
     # ------------------------------------------------------------------ serviço
     api_host: str = "0.0.0.0"
@@ -45,6 +61,14 @@ class Settings(BaseSettings):
         if not normalizada:
             raise ValueError("URL base não pode ser vazia")
         return normalizada
+
+    @field_validator("mcp_url")
+    @classmethod
+    def _normalizar_mcp_url(cls, value: str) -> str:
+        normalizada = value.strip()
+        if not normalizada:
+            raise ValueError("ORQ_MCP_URL não pode ser vazia")
+        return normalizada.rstrip("/") + "/"
 
     @field_validator("log_level")
     @classmethod

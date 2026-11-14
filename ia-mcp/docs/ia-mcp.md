@@ -75,19 +75,21 @@ Endpoints:
 
 ## 5. Configuração
 
-Todas as variáveis usam o prefixo `IA_MCP_` e podem vir do ambiente ou de um
-arquivo `.env`. Nenhuma URL, credencial ou caminho de recurso externo é fixado
+A configuração vem de variáveis de ambiente e de um `.env` opcional. O restante
+usa o prefixo `IA_MCP_`. As variáveis do provedor têm nomes canônicos `AI_*`;
+os nomes prefixados `IA_MCP_AI_*` também são aceitos e têm precedência quando
+ambos existem. Nenhuma URL, credencial ou caminho de recurso externo é fixado
 no código.
 
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `IA_MCP_BACKEND_BASE_URL` | `http://localhost:8000` | URL do backend operacional usada pelas ferramentas MCP. |
 | `IA_MCP_BACKEND_TIMEOUT_SECONDS` | `10` | Timeout das chamadas ao backend. |
-| `IA_MCP_AI_PROVIDER` | `auto` | `auto`, `openai_compatible` ou `heuristic`. |
-| `IA_MCP_AI_BASE_URL` | vazio | Base da API OpenAI-compatible (ex.: `https://api.openai.com/v1`). |
-| `IA_MCP_AI_API_KEY` | vazio | Chave do provedor. Não é logada. |
-| `IA_MCP_AI_MODEL` | vazio | Modelo usado nas chamadas. |
-| `IA_MCP_AI_TIMEOUT_SECONDS` | `20` | Timeout das chamadas ao provedor. |
+| `AI_PROVIDER` (ou `IA_MCP_AI_PROVIDER`) | `auto` | `auto`, `openai_compatible` ou `heuristic`. |
+| `AI_BASE_URL` (ou `IA_MCP_AI_BASE_URL`) | vazio | Base da API OpenAI-compatible (ex.: `https://api.openai.com/v1`). |
+| `AI_API_KEY` (ou `IA_MCP_AI_API_KEY`) | vazio | Chave do provedor. Não é logada. |
+| `AI_MODEL` (ou `IA_MCP_AI_MODEL`) | vazio | Modelo usado nas chamadas. |
+| `AI_TIMEOUT` (ou `IA_MCP_AI_TIMEOUT_SECONDS`) | `20` | Timeout das chamadas ao provedor. |
 | `IA_MCP_VOCABULARY_PATH` | `src/ia_mcp/vocabulary/tags.json` | JSON de tags fornecido pelo backend. |
 | `IA_MCP_KEYWORDS_PATH` | `src/ia_mcp/vocabulary/keywords.json` | Sinônimos do fallback heurístico. |
 | `IA_MCP_API_HOST` | `0.0.0.0` | Host do Uvicorn no entrypoint `python -m ia_mcp.main`. |
@@ -102,9 +104,9 @@ no código.
 
 ### Modos do provedor
 
-- `auto`: usa o modelo OpenAI-compatible se `IA_MCP_AI_BASE_URL` e
-  `IA_MCP_AI_MODEL` estiverem configurados; caso contrário, usa apenas o
-  heurístico. Em falha técnica do modelo, cai no heurístico.
+- `auto`: usa o modelo OpenAI-compatible se `AI_BASE_URL` e `AI_MODEL`
+  estiverem configurados; caso contrário, usa apenas o heurístico. Em falha
+  técnica do modelo, cai no heurístico.
 - `openai_compatible`: exige URL e modelo; ainda usa o heurístico como fallback.
 - `heuristic`: funciona offline, sem rede e sem credenciais.
 
@@ -122,10 +124,10 @@ implemente funciona sem mudar código. Para a demo do hackathon:
 Configuração típica com Groq:
 
 ```bash
-IA_MCP_AI_PROVIDER=openai_compatible
-IA_MCP_AI_BASE_URL=https://api.groq.com/openai/v1
-IA_MCP_AI_MODEL=openai/gpt-oss-120b
-IA_MCP_AI_API_KEY=<chave>
+AI_PROVIDER=openai_compatible
+AI_BASE_URL=https://api.groq.com/openai/v1
+AI_MODEL=openai/gpt-oss-120b
+AI_API_KEY=<chave>
 ```
 
 Por que não alucina:

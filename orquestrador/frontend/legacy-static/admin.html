@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Painel da associação | ORVYN</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="/js/admin-common.js" defer></script>
+    <script src="/js/admin.js" defer></script>
+  </head>
+  <body>
+    <aside class="admin-sidebar">
+      <div>
+        <a class="admin-brand" href="/">ORVYN</a>
+        <a class="admin-primary-link" href="/admin-demandas.html">Revisar demandas →</a>
+        <p class="admin-nav-label">Administração</p>
+        <nav class="admin-nav" aria-label="Administração">
+          <a class="active" href="/admin.html">▦ <span>Visão geral</span></a>
+          <a href="/admin-demandas.html">▤ <span>Demandas</span></a>
+          <a href="/admin-radar.html">ϟ <span>Radar de oportunidades</span></a>
+          <a href="/admin-padroes.html">▥ <span>Análise de padrões</span></a>
+        </nav>
+      </div>
+      <div class="admin-profile"><span class="admin-avatar">AC</span><span><strong>Associação Comercial</strong><small>Administração</small></span></div>
+    </aside>
+    <div class="admin-app">
+      <header class="admin-topbar"><span>Visão geral</span><span class="admin-connection"><i></i> Sistema conectado</span></header>
+      <main class="admin-content">
+        <div class="admin-page-heading"><h1>Painel da associação</h1><p>Acompanhe as demandas do varejo</p></div>
+        <div class="admin-error" id="admin-error" role="alert" hidden></div>
+        <section class="metric-grid" aria-label="Indicadores">
+          <article class="metric-card"><span>Lojistas</span><strong id="metric-lojistas">—</strong><small>Ativos na plataforma</small></article>
+          <article class="metric-card"><span>Startups</span><strong id="metric-startups">—</strong><small>Cadastradas e aptas</small></article>
+          <article class="metric-card"><span>Demandas</span><strong id="metric-demandas">—</strong><small>Registradas no ciclo</small></article>
+          <article class="metric-card"><span>Oportunidades</span><strong id="metric-oportunidades">—</strong><small>Matches identificados</small></article>
+        </section>
+        <section class="admin-panel">
+          <header class="panel-heading"><div><h2>Fila de curadoria</h2><p>Demandas aguardando validação e triagem</p></div><a href="/admin-demandas.html">Ver todas →</a></header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Lojista</th><th>Segmento</th><th>Necessidade</th><th>Status</th><th>Ação</th></tr></thead>
+              <tbody id="queue-body"><tr><td colspan="5">Carregando demandas...</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

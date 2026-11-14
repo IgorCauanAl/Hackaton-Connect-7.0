@@ -10,21 +10,26 @@ from time import perf_counter
 from uuid import uuid4
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from orquestrador.api.deps import get_ator
 from orquestrador.api.routes import router
 from orquestrador.clients.backend import BackendClient
 from orquestrador.clients.ia import IAClient
+from orquestrador.clients.mcp import MCPClient
 from orquestrador.config import Settings
 from orquestrador.container import Container
+from orquestrador.domain import Ator
 from orquestrador.errors import ErroDeOrquestracao
 from orquestrador.idempotency import IdempotencyStore
 from orquestrador.services.demandas import ServicoDemandas
 from orquestrador.services.insights import ServicoInsights
+from orquestrador.services.mcp import ServicoMCP
 from orquestrador.services.relatorios import ServicoRelatorios
 from orquestrador.services.testes import ServicoTestes
 
@@ -47,6 +52,7 @@ def create_app(
     *,
     backend_client: BackendClient | None = None,
     ia_client: IAClient | None = None,
+    mcp_client: MCPClient | None = None,
 ) -> FastAPI:
     """Cria a aplicação. Clientes podem ser injetados nos testes."""
 
@@ -61,12 +67,17 @@ def create_app(
         base_url=settings.ia_base_url,
         timeout=settings.ia_timeout_seconds,
     )
+    mcp = mcp_client or MCPClient(
+        url=settings.mcp_url,
+        timeout=settings.mcp_timeout_seconds,
+    )
 
     container = Container(
         demandas=ServicoDemandas(backend, ia),
         insights=ServicoInsights(backend),
         testes=ServicoTestes(backend),
         relatorios=ServicoRelatorios(backend),
+        mcp=ServicoMCP(mcp),
     )
 
     app = FastAPI(
@@ -79,6 +90,7 @@ def create_app(
     )
     app.state.settings = settings
     app.state.container = container
+    app.state.backend = backend
     app.state.idempotencia = IdempotencyStore(settings.idempotency_ttl_seconds)
 
     @app.middleware("http")
@@ -174,6 +186,43 @@ def create_app(
     @app.get("/health", tags=["infra"])
     async def health() -> dict[str, str]:
         return {"status": "ok", "servico": "orquestrador"}
+
+    # ------------------------------------------------------ pass-through GET
+    @app.get("/api/{caminho:path}", tags=["proxy"], include_in_schema=False)
+    async def proxy_backend(
+        caminho: str,
+        request: Request,
+        ator: Ator = Depends(get_ator),
+    ):
+        """Repassa leituras ao backend preservando ``X-Perfil``/``X-Ator-Id``.
+
+        Apenas GET: toda escrita ou fluxo composto passa por ``/orquestracao``.
+        A autorização continua no backend operacional.
+        """
+
+        return await backend.get(
+            f"/api/{caminho}",
+            ator=ator,
+            params=dict(request.query_params),
+            etapa="proxy_leitura",
+        )
+
+    # --------------------------------------------------------- frontend (SPA)
+    frontend_dir = settings.frontend_dir
+    if (
+        settings.frontend_enabled
+        and frontend_dir.is_dir()
+        and (frontend_dir / "index.html").is_file()
+    ):
+        # Montado por último para não capturar /orquestracao, /api ou /health.
+        app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+        logger.info("Frontend estático servido de %s", frontend_dir)
+    else:
+        logger.info(
+            "Frontend não montado (ORQ_FRONTEND_ENABLED=%s, diretório=%s).",
+            settings.frontend_enabled,
+            frontend_dir,
+        )
 
     return app
 

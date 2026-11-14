@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Análise de padrões | ORVYN</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="/js/admin-common.js" defer></script>
+    <script src="/js/admin-padroes.js" defer></script>
+  </head>
+  <body>
+    <aside class="admin-sidebar">
+      <div>
+        <a class="admin-brand" href="/">ORVYN</a>
+        <a class="admin-primary-link" href="/admin-demandas.html">Revisar demandas →</a>
+        <p class="admin-nav-label">Administração</p>
+        <nav class="admin-nav" aria-label="Administração">
+          <a href="/admin.html">▦ <span>Visão geral</span></a>
+          <a href="/admin-demandas.html">▤ <span>Demandas</span></a>
+          <a href="/admin-radar.html">ϟ <span>Radar de oportunidades</span></a>
+          <a class="active" href="/admin-padroes.html">▥ <span>Análise de padrões</span></a>
+        </nav>
+      </div>
+      <div class="admin-profile"><span class="admin-avatar">AC</span><span><strong>Associação Comercial</strong><small>Administração</small></span></div>
+    </aside>
+    <div class="admin-app">
+      <header class="admin-topbar"><span>Demandas <span class="crumb-separator">›</span> Análise de padrões</span><span class="admin-connection"><i></i> Sistema conectado</span></header>
+      <main class="admin-content">
+        <div class="admin-page-heading heading-with-action"><div><h1>Análise de padrões</h1><p>Identifique necessidades recorrentes no varejo</p></div><button class="admin-button" id="generate-insights" type="button">ϟ Gerar insights</button></div>
+        <div class="admin-error" id="admin-error" role="alert" hidden></div>
+        <div class="insight-meta"><span id="insight-count">Carregando padrões...</span><span id="insight-origin"></span></div>
+        <section class="pattern-grid" id="pattern-grid" aria-label="Padrões identificados"></section>
+        <section class="admin-panel mcp-panel">
+          <header class="panel-heading"><div><h2>Análise dos padrões de problemas dos lojistas</h2><p>Análise da IA e dados complementares retornados pelo MCP</p></div></header>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Padrão</th><th>Demandas no radar</th><th>Startups retornadas</th><th>Sugestão do radar MCP</th><th>Origem</th></tr></thead>
+              <tbody id="mcp-results"><tr><td colspan="5">Consultando o MCP...</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="admin-panel related-panel" id="related-panel" hidden>
+          <header class="panel-heading"><div><h2 id="related-title">Demandas relacionadas</h2><p>Demandas que formam este padrão</p></div><button class="text-button" id="close-related" type="button">Fechar</button></header>
+          <div id="related-list"></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

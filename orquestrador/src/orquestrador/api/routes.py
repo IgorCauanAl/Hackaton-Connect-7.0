@@ -43,6 +43,21 @@ async def obter_matching(
     return await container.demandas.matching(ator, demanda_id)
 
 
+@router.post("/demandas/{demanda_id}/validar")
+async def validar_demanda(
+    demanda_id: int,
+    request: Request,
+    ator: Ator = Depends(get_ator),
+    container: Container = Depends(get_container),
+):
+    """Valida a demanda na curadoria; a autorização real é do backend."""
+
+    async def acao():
+        return await container.demandas.validar(ator, demanda_id), 200
+
+    return await executar_idempotente(request, {}, acao)
+
+
 # --------------------------------------------------------------------- RF-03
 @router.post("/insights")
 async def gerar_insights(
@@ -64,6 +79,34 @@ async def consultar_radar(
     container: Container = Depends(get_container),
 ):
     return await container.insights.radar(ator)
+
+
+@router.get("/padroes")
+async def consultar_padroes(
+    ator: Ator = Depends(get_ator),
+    container: Container = Depends(get_container),
+):
+    """Radar enriquecido com a tag do grupo (leitura real do backend)."""
+
+    return await container.insights.padroes(ator)
+
+
+# --------------------------------------------------------------- MCP (leitura)
+@router.get("/mcp/radar")
+async def mcp_radar(
+    ator: Ator = Depends(get_ator),
+    container: Container = Depends(get_container),
+):
+    return await container.mcp.radar(ator)
+
+
+@router.get("/mcp/startups")
+async def mcp_startups(
+    tag: str | None = None,
+    ator: Ator = Depends(get_ator),
+    container: Container = Depends(get_container),
+):
+    return await container.mcp.startups(ator, tag)
 
 
 # --------------------------------------------------------------------- RF-04

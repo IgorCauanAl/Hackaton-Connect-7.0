@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f9fc">
+    <title>Detalhamento da solução | ORVYN</title>
+    <link rel="stylesheet" href="/css/solution.css">
+    <script src="/js/matching-assistant.js" defer></script>
+    <script src="/js/solution.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-main">
+        <a class="brand" href="/" aria-label="ORVYN - início"><span class="brand-mark">O</span><span>ORVYN</span></a>
+        <a class="new-demand-button" href="/chat.html"><span aria-hidden="true">＋</span>Nova necessidade</a>
+        <p class="nav-caption">Workspace</p>
+        <nav class="side-nav" aria-label="Workspace">
+          <a href="/" class="nav-link">⌂ <span>Visão geral</span></a>
+          <a href="/chat.html" class="nav-link active" aria-current="page">⌕ <span>Encontrar soluções</span></a>
+          <a href="/" class="nav-link">⚙ <span>Configurações</span></a>
+        </nav>
+      </div>
+      <div class="sidebar-profile">
+        <span class="avatar" id="profile-initials">--</span>
+        <span class="profile-copy"><strong id="profile-name">Carregando perfil...</strong><small>Lojista</small></span>
+      </div>
+    </aside>
+    <div class="app-area">
+      <header class="topbar">
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Início</a><span>›</span><a id="results-link">Soluções encontradas</a><span>›</span><strong>Detalhes</strong></nav>
+        <span class="connection-indicator"><span class="connection-dot"></span>Conectado</span>
+      </header>
+      <main class="page-content">
+        <a class="back-link" id="back-link">← Voltar aos resultados</a>
+        <div class="page-error" id="page-error" role="alert" hidden></div>
+        <div class="loading-state" id="loading-state" role="status">Carregando solução...</div>
+        <div id="solution-content" hidden>
+          <section class="solution-card">
+            <div class="solution-labels">
+              <span class="rank-badge" id="solution-rank"></span>
+              <span class="category-badge" id="solution-category"></span>
+            </div>
+            <h1 id="solution-name"></h1>
+            <p class="solution-description" id="solution-description"></p>
+            <div class="offer-box">
+              <span>Solução oferecida</span>
+              <p id="solution-offer"></p>
+            </div>
+          </section>
+
+          <section class="compatibility-section">
+            <h2>Análise de compatibilidade</h2>
+            <p class="section-subtitle">Diagnóstico individual baseado nas respostas do lojista</p>
+            <div class="compatibility-grid">
+              <div class="score-card">
+                <span class="metric-label">Score de aderência</span>
+                <p class="score"><strong id="overall-score">--</strong><span>/100</span></p>
+                <span class="high-fit" id="fit-label"></span>
+                <p class="demand-note" id="demand-title"></p>
+              </div>
+              <div class="criteria-card">
+                <div id="criteria-list"></div>
+              </div>
+            </div>
+            <section class="assistant-insight" aria-label="Resposta do assistente">
+              <span>Resposta do assistente</span>
+              <p id="assistant-answer"></p>
+              <small>Síntese baseada no seu diagnóstico e nos critérios de compatibilidade.</small>
+            </section>
+          </section>
+
+          <section class="test-card">
+            <div>
+              <h2>Experimente por 15 dias</h2>
+              <p>Solicite um teste desta solução. A startup receberá sua demanda após sua autorização.</p>
+            </div>
+            <label class="consent-row">
+              <input id="consent" type="checkbox">
+              <span>Autorizo compartilhar esta demanda com a startup para iniciar o teste.</span>
+            </label>
+            <div class="test-actions">
+              <span class="form-error" id="consent-error" role="alert"></span>
+              <button class="primary-button" id="request-test" type="button" disabled>Solicitar teste de 15 dias →</button>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

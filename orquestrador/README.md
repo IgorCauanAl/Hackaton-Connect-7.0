@@ -24,13 +24,38 @@ React  →  Orquestrador (:8200)  →  Backend operacional (:8000)
 
 ## Como rodar
 
-Requer Python 3.12+ e [uv](https://docs.astral.sh/uv/).
+Requer Python 3.12+ e [uv](https://docs.astral.sh/uv/). Para o frontend, Node.js
+20+ e `npm`.
+
+### Integrado (recomendado)
+
+Na raiz do repositório:
+
+```bash
+cp .env.example .env      # backend + IA/MCP + orquestrador
+./scripts/dev.sh
+```
+
+Sobe os três serviços e serve o build do frontend em
+<http://localhost:8200/>. O script recusa portas ocupadas e encerra apenas os
+processos que iniciou.
+
+### Somente o orquestrador
 
 ```bash
 cd orquestrador
 cp .env.example .env          # ajuste as URLs se necessário
 uv sync
 uv run uvicorn orquestrador.main:app --host 0.0.0.0 --port 8200
+```
+
+O frontend é servido automaticamente quando `orquestrador/frontend/dist/`
+existe. Para gerá-lo:
+
+```bash
+cd frontend
+npm install
+npm run build
 ```
 
 Verificação:
@@ -49,9 +74,13 @@ Somente variáveis de ambiente (prefixo `ORQ_`), com `.env` opcional:
 | Variável | Padrão | Descrição |
 | --- | --- | --- |
 | `ORQ_BACKEND_BASE_URL` | `http://localhost:8000` | Backend operacional |
-| `ORQ_BACKEND_TIMEOUT_SECONDS` | `10` | Timeout do backend |
+| `ORQ_BACKEND_TIMEOUT_SECONDS` | `40` | Timeout do backend (cobre a chamada do backend ao IA/MCP) |
 | `ORQ_IA_BASE_URL` | `http://localhost:8100` | Serviço IA/MCP |
-| `ORQ_IA_TIMEOUT_SECONDS` | `25` | Timeout da IA (deve cobrir o modelo) |
+| `ORQ_IA_TIMEOUT_SECONDS` | `30` | Timeout da IA (deve cobrir o modelo) |
+| `ORQ_MCP_URL` | `http://localhost:8100/mcp/` | Endpoint Streamable HTTP do FastMCP |
+| `ORQ_MCP_TIMEOUT_SECONDS` | `10` | Timeout das ferramentas MCP |
+| `ORQ_FRONTEND_ENABLED` | `true` | Serve o build do frontend quando presente |
+| `ORQ_FRONTEND_DIR` | `orquestrador/frontend/dist` | Diretório do build do Vite |
 | `ORQ_API_HOST` | `0.0.0.0` | Host HTTP |
 | `ORQ_API_PORT` | `8200` | Porta HTTP |
 | `ORQ_IDEMPOTENCY_TTL_SECONDS` | `600` | Retenção das chaves idempotentes |
@@ -79,15 +108,25 @@ Todas as rotas exigem `X-Perfil`. Sucesso devolve
 | --- | --- | --- | --- |
 | `POST` | `/orquestracao/demandas` | lojista | Classifica via IA e registra a demanda |
 | `GET` | `/orquestracao/demandas/{id}/matching` | lojista/admin | Consulta o ranking já calculado |
+| `POST` | `/orquestracao/demandas/{id}/validar` | admin | Valida a demanda na curadoria |
 | `POST` | `/orquestracao/insights` | admin | Gera insights via IA (fallback no backend) |
 | `GET` | `/orquestracao/radar` | admin | Consulta o Radar |
+| `GET` | `/orquestracao/padroes` | admin | Radar + tag do grupo derivada das demandas reais |
+| `GET` | `/orquestracao/mcp/radar` | admin/mcp | Executa `listar_radar` no FastMCP |
+| `GET` | `/orquestracao/mcp/startups?tag=` | admin/mcp | Executa `buscar_startups` no FastMCP |
 | `POST` | `/orquestracao/testes` | lojista | Solicita teste e confirma o status |
 | `GET` | `/orquestracao/testes/{id}` | lojista/admin | Consulta o teste |
 | `POST` | `/orquestracao/testes/{id}/feedback` | lojista/admin | Solicita o feedback demonstrativo |
 | `POST` | `/orquestracao/demandas/{id}/encaminhar` | admin | Encaminha oportunidade e confirma o relatório |
 | `GET` | `/orquestracao/startups/{id}/relatorios` | startup/admin | Lista oportunidades da startup |
 | `GET` | `/orquestracao/relatorios/{id}` | startup/admin | Lê o relatório (`versao=anonimizada\|completa`) |
+| `GET` | `/api/{caminho}` | conforme backend | Pass-through **somente GET** para leituras do backend |
+| `GET` | `/` e `/*.html` | público | Frontend React (quando o build existe) |
 | `GET` | `/health` | público | Health check |
+
+O pass-through `/api/*` repassa `X-Perfil`/`X-Ator-Id` e `query string`; toda
+escrita ou fluxo composto deve passar por `/orquestracao/*`. A autorização
+continua no backend operacional.
 
 Exemplo:
 
@@ -158,20 +197,49 @@ Todo erro devolve `X-Trace-Id`, também presente no corpo. O `503` de IA **não
 propaga**: o backend possui fallback determinístico e o orquestrador apenas
 registra o aviso.
 
+## Frontend React
+
+`frontend/` é um app Vite **multi-página** (React 19) que preserva as URLs do
+frontend estático original (`/`, `/chat.html`, `/resultados.html`,
+`/solucao.html`, `/teste.html`, `/oportunidade.html`, `/admin*.html`). Cada
+página importa apenas o seu CSS; o build sai em `frontend/dist/` e é montado
+pelo orquestrador na mesma origem.
+
+- `src/lib/http.js` é a única camada HTTP do navegador: leituras via `/api`,
+  fluxos compostos via `/orquestracao`;
+- `legacy-static/` guarda os arquivos HTML/CSS/JS originais como referência;
+- em desenvolvimento, `npm run dev` usa proxy para `http://localhost:8200`.
+
+## Verificação de integração
+
+Com os três serviços no ar (`scripts/dev.sh`):
+
+```bash
+cd orquestrador
+uv run python ../scripts/integration_check.py
+```
+
+O script valida saúde/frontend, registro com IA, heurística sem chave,
+fallback com IA fora do ar, contrato do matching, validação, insights/padrões,
+as duas ferramentas MCP via FastMCP real e o ciclo
+encaminhamento → relatório → teste → feedback. Cenários de indisponibilidade
+usam instâncias temporárias isoladas (portas `8199`/`8098`/`8298`).
+
 ## Estrutura
 
 ```
 src/orquestrador/
 ├── api/            # rotas, schemas de entrada e dependências
-├── clients/        # HTTP do backend e do IA/MCP
+├── clients/        # HTTP do backend/IA e cliente FastMCP
 ├── services/       # um serviço por requisito funcional
 ├── config.py       # Settings (ORQ_*)
 ├── container.py    # composition root
 ├── domain.py       # Ator
 ├── errors.py       # erros → HTTP
 ├── idempotency.py  # Idempotency-Key
-├── main.py         # FastAPI, handlers, trace
+├── main.py         # FastAPI, handlers, trace, frontend e pass-through /api
 └── trilha.py       # etapas/avisos
+frontend/           # React + Vite (dist servido pelo orquestrador)
 ```
 
 Detalhamento em [`docs/orquestrador.md`](docs/orquestrador.md).

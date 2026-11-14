@@ -87,6 +87,29 @@ class ServicoDemandas:
 
         return {"resultado": dados, "orquestracao": trilha.como_dict()}
 
+    async def validar(self, ator: Ator, demanda_id: int) -> dict[str, Any]:
+        """Encaminha a validação da curadoria ao backend (perfil admin)."""
+
+        trilha = Trilha()
+
+        with etapa(trilha, "validacao_demanda"):
+            resultado = await self._backend.post(
+                f"/api/admin/demandas/{demanda_id}/validar",
+                ator=ator,
+                etapa="validacao_demanda",
+            )
+
+        if not isinstance(resultado, dict) or resultado.get("status") not in (
+            "validado",
+            "validada",
+        ):
+            raise RespostaInvalida(
+                "Validação retornou um payload inesperado.",
+                etapa="validacao_demanda",
+            )
+
+        return {"resultado": resultado, "orquestracao": trilha.como_dict()}
+
     # --------------------------------------------------------------- helpers
     async def _classificar(
         self, texto: str, trilha: Trilha

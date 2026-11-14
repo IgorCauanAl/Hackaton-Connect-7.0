@@ -45,7 +45,7 @@ Detalhes:
   `tags` e não chame a IA uma segunda vez.
 - Se a IA falhar (timeout, `5xx`, JSON inválido, `tags` ausente/vazia), o campo
   `tags` é **omitido** do corpo. O backend então aplica o fallback por botões e
-  marca `tags_origem = "fallback"`.
+  marca `tags_origem = "botoes"`.
 - Uma falha de IA nunca derruba o fluxo: no máximo gera o aviso
   `ia_indisponivel` ou `classificacao_vazia`.
 - O backend executa registro, classificação, matching e persistência em uma
@@ -62,15 +62,18 @@ Valida que `ranking_startups` é lista e `sem_match` é booleano. Se
 `sem_match=true` vier acompanhado de ranking, registra o aviso
 `matching_inconsistente` (o dado do backend é preservado, sem correção local).
 
-### 2.3 Insights e Radar (ORQ-RF-03)
+### 2.3 Insights, Radar e padrões (ORQ-RF-03)
 
 ```
-POST /orquestracao/insights   →  POST {BACKEND}/api/admin/insights/gerar
-GET  /orquestracao/radar      →  GET  {BACKEND}/api/admin/radar
+POST /orquestracao/insights        →  POST {BACKEND}/api/admin/insights/gerar
+GET  /orquestracao/radar           →  GET  {BACKEND}/api/admin/radar
+GET  /orquestracao/padroes         →  Radar + tag do grupo (leitura das demandas)
+GET  /orquestracao/mcp/radar       →  ferramenta MCP listar_radar
+GET  /orquestracao/mcp/startups    →  ferramenta MCP buscar_startups?tag=
 ```
 
-- Exclusivo de `admin` (associação). A checagem é antecipada no orquestrador;
-  o backend revalida.
+- Exclusivo de `admin` (associação); as ferramentas MCP aceitam `admin`/`mcp`.
+  A checagem é antecipada no orquestrador; o backend revalida.
 - O envio de grupos para a IA é feito **pelo backend**, que tem acesso às
   quantidades. O orquestrador nunca envia números para a IA.
 - Cada item do Radar precisa conter exatamente os campos:
@@ -80,6 +83,11 @@ GET  /orquestracao/radar      →  GET  {BACKEND}/api/admin/radar
 - Se algum item tiver `origem = "referencia"`, o orquestrador adiciona o aviso
   `fallback_referencia`: a IA não respondeu e o backend usou a interpretação
   determinística.
+- O endpoint `padroes` acrescenta `tag` ao radar lendo as demandas reais do
+  grupo (o backend ainda não expõe a tag nesse payload). Nenhuma quantidade,
+  pontuação ou regra de matching é recalculada.
+- As rotas MCP chamam o FastMCP do IA/MCP via Streamable HTTP e validam o
+  contrato antes de devolver; falha de transporte vira `503 mcp_indisponivel`.
 
 ### 2.4 Teste demonstrativo (ORQ-RF-04)
 

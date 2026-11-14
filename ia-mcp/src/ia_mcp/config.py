@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -27,6 +27,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
+        populate_by_name=True,
     )
 
     # ------------------------------------------------------------------ backend
@@ -36,11 +37,39 @@ class Settings(BaseSettings):
     backend_ator_id: int | None = None
 
     # --------------------------------------------------------------- provedor IA
-    ai_provider: Literal["auto", "openai_compatible", "heuristic"] = "auto"
-    ai_base_url: str = ""
-    ai_api_key: str = ""
-    ai_model: str = ""
-    ai_timeout_seconds: float = Field(default=20.0, gt=0)
+    # Nomes canônicos (``AI_*``) e prefixados (``IA_MCP_AI_*``). O prefixado tem
+    # precedência, preservando a configuração já usada pelo serviço.
+    ai_provider: Literal["auto", "openai_compatible", "heuristic"] = Field(
+        default="auto",
+        validation_alias=AliasChoices(
+            "IA_MCP_AI_PROVIDER", "AI_PROVIDER"
+        ),
+    )
+    ai_base_url: str = Field(
+        default="",
+        validation_alias=AliasChoices(
+            "IA_MCP_AI_BASE_URL", "AI_BASE_URL"
+        ),
+    )
+    ai_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices(
+            "IA_MCP_AI_API_KEY", "AI_API_KEY"
+        ),
+    )
+    ai_model: str = Field(
+        default="",
+        validation_alias=AliasChoices(
+            "IA_MCP_AI_MODEL", "AI_MODEL"
+        ),
+    )
+    ai_timeout_seconds: float = Field(
+        default=20.0,
+        gt=0,
+        validation_alias=AliasChoices(
+            "IA_MCP_AI_TIMEOUT_SECONDS", "AI_TIMEOUT", "AI_TIMEOUT_SECONDS"
+        ),
+    )
 
     # --------------------------------------------------------------- vocabulário
     vocabulary_path: Path = DEFAULT_VOCABULARY_PATH

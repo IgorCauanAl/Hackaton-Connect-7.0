@@ -39,6 +39,44 @@ def test_mcp_path_normalization(value: str) -> None:
     assert Settings(_env_file=None, mcp_path=value).mcp_path == "/mcp"
 
 
+def test_canonical_ai_env_names_are_accepted(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AI_PROVIDER", "heuristic")
+    monkeypatch.setenv("AI_BASE_URL", "https://api.exemplo.com/v1/")
+    monkeypatch.setenv("AI_MODEL", "modelo")
+    monkeypatch.setenv("AI_API_KEY", "segredo")
+    monkeypatch.setenv("AI_TIMEOUT", "12")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.ai_provider == "heuristic"
+    assert settings.ai_base_url == "https://api.exemplo.com/v1"
+    assert settings.ai_model == "modelo"
+    assert settings.ai_api_key == "segredo"
+    assert settings.ai_timeout_seconds == 12
+
+
+def test_prefixed_ai_env_names_take_precedence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AI_PROVIDER", "heuristic")
+    monkeypatch.setenv("AI_MODEL", "canonico")
+    monkeypatch.setenv("IA_MCP_AI_PROVIDER", "auto")
+    monkeypatch.setenv("IA_MCP_AI_MODEL", "prefixado")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.ai_provider == "auto"
+    assert settings.ai_model == "prefixado"
+
+
+def test_ai_timeout_seconds_alias(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AI_TIMEOUT_SECONDS", "7.5")
+
+    assert Settings(_env_file=None).ai_timeout_seconds == 7.5
+
+
 def test_mcp_path_rejects_root() -> None:
     with pytest.raises(ValueError):
         Settings(_env_file=None, mcp_path="/")

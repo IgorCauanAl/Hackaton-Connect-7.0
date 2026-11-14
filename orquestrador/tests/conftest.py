@@ -99,6 +99,26 @@ OPORTUNIDADES = [
     }
 ]
 
+MCP_RADAR = [
+    {
+        "dor": "Atendimento",
+        "quantidade": 7,
+        "sugestao_ia": "Automatizar o atendimento.",
+        "origem": "ia",
+    }
+]
+
+MCP_STARTUPS = [
+    {
+        "id": 1,
+        "nome": "ZapBot",
+        "descricao": "Atendimento automático",
+        "solucao": "Bot de WhatsApp",
+        "segmentos": ["moda"],
+        "tags": ["whatsapp"],
+    }
+]
+
 
 @pytest.fixture(autouse=True)
 def _isolar_ambiente(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -130,6 +150,7 @@ def montar_app():
         respostas: dict[tuple[str, str], tuple[int, Any]] | None = None,
         *,
         ia: Callable[[httpx.Request], httpx.Response] | None = None,
+        mcp: Any = None,
     ):
         vistos: list[httpx.Request] = []
         requisicoes_ia: list[httpx.Request] = []
@@ -160,6 +181,7 @@ def montar_app():
             Settings(_env_file=None),
             backend_client=backend,
             ia_client=cliente_ia,
+            mcp_client=mcp,
         )
         return app, vistos, requisicoes_ia
 

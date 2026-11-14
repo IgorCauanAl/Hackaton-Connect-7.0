@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detalhes da demanda | ORVYN</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <script src="/js/admin-common.js" defer></script>
+    <script src="/js/admin-demanda.js" defer></script>
+  </head>
+  <body>
+    <aside class="admin-sidebar">
+      <div>
+        <a class="admin-brand" href="/">ORVYN</a>
+        <a class="admin-primary-link" href="/admin-demandas.html">Revisar demandas →</a>
+        <p class="admin-nav-label">Administração</p>
+        <nav class="admin-nav" aria-label="Administração">
+          <a href="/admin.html">▦ <span>Visão geral</span></a>
+          <a class="active" href="/admin-demandas.html">▤ <span>Demandas</span></a>
+          <a href="/admin-radar.html">ϟ <span>Radar de oportunidades</span></a>
+          <a href="/admin-padroes.html">▥ <span>Análise de padrões</span></a>
+        </nav>
+      </div>
+      <div class="admin-profile"><span class="admin-avatar">AC</span><span><strong>Associação Comercial</strong><small>Administração</small></span></div>
+    </aside>
+    <div class="admin-app">
+      <header class="admin-topbar"><span><a href="/admin-demandas.html">Demandas</a> <span class="crumb-separator">›</span> Detalhes</span><span class="admin-connection"><i></i> Sistema conectado</span></header>
+      <main class="admin-content">
+        <a class="admin-back-link" href="/admin-demandas.html">← Voltar às demandas</a>
+        <div class="admin-page-heading"><h1>Detalhes da demanda</h1><p>Análise e curadoria técnica da solicitação comercial</p></div>
+        <div class="admin-error" id="admin-error" role="alert" hidden></div>
+        <div class="admin-loading" id="admin-loading" role="status">Carregando demanda...</div>
+        <div id="demand-content" hidden>
+          <section class="demand-summary">
+            <div><span class="field-label">Lojista</span><strong id="demand-merchant"></strong></div>
+            <div><span class="field-label">Segmento comercial</span><strong id="demand-segment"></strong></div>
+            <div><span class="field-label">Protocolo</span><strong id="demand-protocol"></strong></div>
+            <div><span class="field-label">Status</span><span class="status-chip" id="demand-status"></span></div>
+          </section>
+          <section class="admin-detail-grid">
+            <article class="admin-panel">
+              <header class="panel-heading"><div><h2>Respostas do diagnóstico</h2><p>Informações fornecidas pelo lojista</p></div></header>
+              <div class="answer-grid" id="answer-grid"></div>
+            </article>
+            <article class="admin-panel tags-panel">
+              <header class="panel-heading"><div><h2>Tags identificadas</h2><p>Classificação da necessidade</p></div></header>
+              <div class="admin-tags" id="demand-tags"></div>
+              <p class="panel-note">Tags geradas pelo diagnóstico e pelo classificador.</p>
+            </article>
+          </section>
+          <section class="admin-panel description-panel">
+            <header class="panel-heading"><div><h2>Descrição da necessidade</h2><p>Relato do lojista</p></div></header>
+            <blockquote id="demand-text"></blockquote>
+          </section>
+          <section class="admin-panel matches-panel">
+            <header class="panel-heading"><div><h2>Resultado do matching</h2><p>Startups aptas identificadas pelo motor de compatibilidade</p></div></header>
+            <div id="match-list"></div>
+          </section>
+          <section class="admin-panel action-panel">
+            <header class="panel-heading"><div><h2>Curadoria da associação</h2><p>Valide a demanda antes de encaminhá-la a uma startup</p></div></header>
+            <div class="action-controls">
+              <button class="admin-button" id="validate-demand" type="button" hidden>Validar demanda</button>
+              <label id="startup-wrap" hidden>Startup recomendada<select id="startup-select"></select></label>
+              <button class="admin-button" id="forward-demand" type="button" hidden>Encaminhar oportunidade</button>
+              <span class="action-message" id="action-message" role="status"></span>
+            </div>
+          </section>
+          <section class="admin-panel">
+            <header class="panel-heading"><div><h2>Histórico</h2><p>Etapas registradas para esta demanda</p></div></header>
+            <ol class="history-list" id="history-list"></ol>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

@@ -58,8 +58,16 @@ EXPECTED_TAGS = {
 def _isolate_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     """Garante que variáveis do ambiente do desenvolvedor não afetem os testes."""
 
+    ai_vars = {
+        "AI_PROVIDER",
+        "AI_BASE_URL",
+        "AI_API_KEY",
+        "AI_MODEL",
+        "AI_TIMEOUT",
+        "AI_TIMEOUT_SECONDS",
+    }
     for key in list(os.environ):
-        if key.startswith("IA_MCP_"):
+        if key.startswith("IA_MCP_") or key in ai_vars:
             monkeypatch.delenv(key, raising=False)
 
 

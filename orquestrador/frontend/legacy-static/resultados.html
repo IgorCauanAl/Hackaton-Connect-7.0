@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f9fc">
+    <title>Soluções compatíveis | ORVYN</title>
+    <link rel="stylesheet" href="/css/results.css">
+    <script src="/js/matching-assistant.js" defer></script>
+    <script src="/js/results.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="sidebar-main">
+        <a class="brand" href="/" aria-label="ORVYN - início">
+          <span class="brand-mark" aria-hidden="true">O</span>
+          <span>ORVYN</span>
+        </a>
+        <a class="new-demand-button" href="/chat.html">
+          <span aria-hidden="true">＋</span>
+          Nova necessidade
+        </a>
+        <p class="nav-caption">Workspace</p>
+        <nav class="side-nav" aria-label="Workspace">
+          <a href="/" class="nav-link"><span aria-hidden="true">⌂</span>Visão geral</a>
+          <a href="/chat.html" class="nav-link active" aria-current="page"><span aria-hidden="true">⌕</span>Encontrar soluções</a>
+          <a href="/" class="nav-link"><span aria-hidden="true">⚙</span>Configurações</a>
+        </nav>
+      </div>
+      <div class="sidebar-profile">
+        <span class="avatar" id="profile-initials">--</span>
+        <span class="profile-copy">
+          <strong id="profile-name">Carregando perfil...</strong>
+          <small>Lojista</small>
+        </span>
+      </div>
+    </aside>
+
+    <div class="app-area">
+      <header class="topbar">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/" aria-label="Início">▦</a>
+          <span aria-hidden="true">›</span>
+          <a href="/chat.html">Encontrar soluções</a>
+          <span aria-hidden="true">›</span>
+          <strong>Resultados</strong>
+        </nav>
+        <span class="connection-indicator">
+          <span class="connection-dot" aria-hidden="true"></span>
+          Conectado
+        </span>
+      </header>
+
+      <main class="page-content">
+        <a class="back-link" href="/chat.html">← Voltar ao diagnóstico</a>
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Diagnóstico concluído</p>
+            <h1>Soluções compatíveis</h1>
+            <p id="demand-summary">Estamos buscando soluções para sua necessidade.</p>
+          </div>
+          <span class="demand-id" id="demand-id"></span>
+        </div>
+
+        <div class="page-error" id="page-error" role="alert" hidden></div>
+        <div class="loading-state" id="loading-state" role="status">Carregando resultados...</div>
+        <section class="results-list" id="results-list" aria-label="Soluções recomendadas" hidden></section>
+        <section class="empty-state" id="empty-state" hidden>
+          <span class="empty-icon" aria-hidden="true">⌕</span>
+          <h2>Ainda não encontramos uma solução compatível</h2>
+          <p>Sua necessidade foi encaminhada para análise da associação. Você pode tentar novamente com outras respostas.</p>
+          <a class="primary-link" href="/chat.html">Revisar diagnóstico</a>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
